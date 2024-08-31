@@ -2,7 +2,9 @@ type Length = "Length";
 type Mass = "Mass";
 type Time = "Time";
 type Energy = "Energy";
-type Quantity = Length | Mass | Time | Energy;
+type Volume = "Volume";
+type Density = "Density";
+type Quantity = Length | Mass | Time | Energy | Volume | Density;
 type Dimension = number[];
 
 interface BasicUnitInfo {

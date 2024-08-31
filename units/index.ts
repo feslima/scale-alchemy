@@ -29,14 +29,14 @@ export const Centimeter: SimpleUnit<Length> = {
 export const Kilogram: SimpleUnit<Mass> = {
   name: "kilogram",
   quantity: "Mass",
-  factor: 1.0,
+  factor: 1.0e3,
   synonyms: ["kg", "kilograms"],
 };
 
 export const Ton: SimpleUnit<Mass> = {
   name: "ton",
   quantity: "Mass",
-  factor: 1.0e3,
+  factor: 1.0e6,
   synonyms: ["ton", "mg", "tonnes", "megagrams"],
 };
 
@@ -61,6 +61,13 @@ export const Hour: SimpleUnit<Time> = {
   synonyms: ["h", "hours"],
 };
 
+export const MegaWattHour: SimpleUnit<Energy> = {
+  name: "megawatt-hour",
+  quantity: "Energy",
+  factor: 3.6e9,
+  synonyms: ["MHh", "megawatt-hours"],
+};
+
 export const Megajoule: SimpleUnit<Energy> = {
   name: "megajoule",
   quantity: "Energy",
@@ -75,40 +82,30 @@ export const Terajoule: SimpleUnit<Energy> = {
   synonyms: ["TJ", "terajoules"],
 };
 
-/* ------------------------ Composite Units ------------------------*/
-type VolumeQuantity = [Length, Length, Length];
-type Volume = CompositeUnit<VolumeQuantity, []>;
-type Velocity = CompositeUnit<[Length], [Time]>;
-type Force = CompositeUnit<[Length, Mass], [Time]>;
-type Density = CompositeUnit<[Mass], VolumeQuantity>;
-
-export const MegaWattHour: CompositeUnit<[Energy, Time], [Time]> = {
-  name: "megawatthour",
-  synonyms: ["MWh", "megawatthours"],
-  dividend: [Megajoule, Hour],
-  divisor: [Second],
-};
-
-export const Stere: Volume = {
+export const Stere: SimpleUnit<Volume> = {
   name: "stere",
   synonyms: ["st", "steres"],
-  dividend: [Meter, Meter, Meter],
-  divisor: [],
+  quantity: "Volume",
+  factor: 1.0,
 };
 
-export const KilogramPerStere: Density = {
+export const KilogramPerStere: SimpleUnit<Density> = {
   name: "kilogram per stere",
   synonyms: ["kg/st", "kg*st^-1"],
-  dividend: [Kilogram],
-  divisor: [Meter, Meter, Meter],
+  quantity: "Density",
+  factor: 1.0,
 };
 
-export const TonPerStere: Density = {
+export const TonPerStere: SimpleUnit<Density> = {
   name: "ton per stere",
   synonyms: ["ton/st", "ton*st^-1"],
-  dividend: [Ton],
-  divisor: [Meter, Meter, Meter],
+  quantity: "Density",
+  factor: 1.0e3,
 };
+
+/* ------------------------ Composite Units ------------------------*/
+type Velocity = CompositeUnit<[Length], [Time]>;
+type Force = CompositeUnit<[Length, Mass], [Time]>;
 
 export const KiloMeterPerHour: Velocity = {
   name: "kilometer per hour",
