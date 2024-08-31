@@ -1,10 +1,17 @@
 import { expect, expectTypeOf, test } from "vitest";
-import { ErrorValue, Evaluator, IntegerValue, ValueObject } from "./evaluator";
+import {
+  ErrorValue,
+  EvaluationEnvironmentType,
+  Evaluator,
+  IntegerValue,
+  ValueObject,
+} from "./evaluator";
 import { Lexer } from "./lexer";
 import { Parser } from "./parser";
 
 interface EvaluatorTestCase {
   input: string;
+  environment?: EvaluationEnvironmentType;
   expected: ValueObject;
 }
 
@@ -13,9 +20,7 @@ test.each([
   { input: "10", expected: new IntegerValue(10) },
   {
     input: "-",
-    expected: new ErrorValue(
-      "object to the right of operator is not integer type",
-    ),
+    expected: new ErrorValue("invalid syntax for evaluation"),
   },
   { input: "-5", expected: new IntegerValue(-5) },
   { input: "-10", expected: new IntegerValue(-10) },
@@ -30,16 +35,34 @@ test.each([
   { input: "3 * 3 * 3 + 10", expected: new IntegerValue(37) },
   { input: "3 * (3 * 3) + 10", expected: new IntegerValue(37) },
   { input: "(5 + 10 * 2 + 15 / 3) * 2 + -10", expected: new IntegerValue(50) },
-] as EvaluatorTestCase[])("evaluation of: $input", ({ input, expected }) => {
-  const expressionTree = new Parser(new Lexer(input)).parse();
-  const evaluator = new Evaluator();
+  {
+    input: "a + b + 5",
+    environment: new Map([
+      ["a", new IntegerValue(5)],
+      ["b", new IntegerValue(5)],
+    ]),
+    expected: new IntegerValue(15),
+  },
+  {
+    input: "tCH + b + 5",
+    environment: new Map([["b", new IntegerValue(5)]]),
+    expected: new ErrorValue("identifier 'tCH' not found"),
+  },
+] as EvaluatorTestCase[])(
+  "evaluation of: $input",
+  ({ input, environment, expected }) => {
+    const expressionTree = new Parser(new Lexer(input)).parse();
+    const evaluator = new Evaluator(
+      environment !== undefined ? environment : new Map(),
+    );
 
-  const result = evaluator.evaluate(expressionTree);
-  expectTypeOf(result).toEqualTypeOf(expected);
-  if (expected instanceof ErrorValue) {
-    expect(result).instanceof(ErrorValue);
-    expect(result).to.have.property("message").be.equal(expected.message);
-  } else {
-    expect(result.equals(expected)).to.be.true;
-  }
-});
+    const result = evaluator.evaluate(expressionTree);
+    expectTypeOf(result).toEqualTypeOf(expected);
+    if (expected instanceof ErrorValue) {
+      expect(result).instanceof(ErrorValue);
+      expect(result).to.have.property("message").be.equal(expected.message);
+    } else {
+      expect(result.equals(expected)).to.be.true;
+    }
+  },
+);

@@ -58,6 +58,9 @@ export class IntegerLiteralNode extends ExpressionNode {
 
 export class IdentifierExpressionNode extends ExpressionNode {
   private _value: string;
+  public get value(): string {
+    return this._value;
+  }
 
   constructor(token: Token, value: string) {
     super(token, "Identifier");

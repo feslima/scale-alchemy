@@ -1,5 +1,6 @@
 import {
   ExpressionNode,
+  IdentifierExpressionNode,
   InfixExpressionNode,
   IntegerLiteralNode,
   PrefixExpressionNode,
@@ -54,33 +55,67 @@ export class IntegerValue extends ValueObject {
   }
 }
 
+export type EvaluationEnvironmentType = Map<string, ValueObject>;
+
 export class Evaluator {
-  constructor() {}
+  private _environment: EvaluationEnvironmentType;
+  constructor(environment: EvaluationEnvironmentType) {
+    this._environment = environment;
+  }
 
   public evaluate(node: ExpressionNode): ValueObject {
     switch (node.type) {
       case "Integer":
         return new IntegerValue((node as IntegerLiteralNode).value);
 
+      case "Identifier": {
+        if (!(node instanceof IdentifierExpressionNode)) {
+          return new ErrorValue(
+            "node type does not match with identifier expression node",
+          );
+        }
+        return this.evalIdentifierNode(node);
+      }
       case "Prefix": {
         const n = node as PrefixExpressionNode;
         const right = this.evaluate(n.right);
+        if (right instanceof ErrorValue) {
+          return right;
+        }
         return this.evalPrefixNode(n.operator, right);
       }
       case "Infix": {
         const n = node as InfixExpressionNode;
+
         const left = this.evaluate(n.left);
+        if (left instanceof ErrorValue) {
+          return left;
+        }
+
         const right = this.evaluate(n.right);
+        if (right instanceof ErrorValue) {
+          return right;
+        }
+
         return this.evalInfixNode(n.operator, left, right);
       }
       case "Invalid": {
-        return new ErrorValue("invalid expression node for evaluation");
+        return new ErrorValue("invalid syntax for evaluation");
       }
       default:
         return new ErrorValue(
           `unrecognized expression node type: ${node.type}`,
         );
     }
+  }
+
+  private evalIdentifierNode(node: IdentifierExpressionNode): ValueObject {
+    const value = this._environment.get(node.value);
+    if (value === undefined) {
+      return new ErrorValue(`identifier '${node.value}' not found`);
+    }
+
+    return value;
   }
 
   private evalPrefixNode(operator: string, right: ValueObject): ValueObject {
@@ -104,7 +139,7 @@ export class Evaluator {
   ): ValueObject {
     if (!(left instanceof IntegerValue) || !(right instanceof IntegerValue)) {
       return new ErrorValue(
-        `both objects must be numbers. Left type: ${left.type}, right type: ${right.type}`,
+        `both objects must be numbers. Left type: ${ObjectType[left.type]}, right type: ${ObjectType[right.type]}`,
       );
     }
 
