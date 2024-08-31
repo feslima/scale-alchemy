@@ -1,10 +1,10 @@
 import {
-  Expression,
-  Identifier,
-  InfixExpression,
-  IntegerLiteral,
-  InvalidExpression,
-  PrefixExpression,
+  ExpressionNode,
+  IdentifierNode,
+  InfixExpressionNode,
+  IntegerLiteralNode,
+  InvalidExpressionNode,
+  PrefixExpressionNode,
 } from "./ast";
 import { Lexer, Token, TokenType } from "./lexer";
 
@@ -27,10 +27,10 @@ export class Parser {
   private _currentToken: Token = { type: TokenType.ILLEGAL, literal: "" };
   private _peekToken: Token = { type: TokenType.ILLEGAL, literal: "" };
 
-  private _prefixParsers = new Map<TokenType, () => Expression>();
+  private _prefixParsers = new Map<TokenType, () => ExpressionNode>();
   private _infixParsers = new Map<
     TokenType,
-    (expression: Expression) => Expression
+    (expression: ExpressionNode) => ExpressionNode
   >();
 
   private _errors: string[] = [];
@@ -75,7 +75,7 @@ export class Parser {
     );
   }
 
-  parse(): Expression {
+  parse(): ExpressionNode {
     return this.parseExpression(Precedence.LOWEST);
   }
 
@@ -98,19 +98,19 @@ export class Parser {
     return p !== undefined ? p : Precedence.LOWEST;
   }
 
-  private parseInteger(): Expression {
-    return new IntegerLiteral(
+  private parseInteger(): ExpressionNode {
+    return new IntegerLiteralNode(
       this._currentToken,
       parseInt(this._currentToken.literal),
     );
   }
 
-  private parseIdentifier(): Expression {
-    return new Identifier(this._currentToken, this._currentToken.literal);
+  private parseIdentifier(): ExpressionNode {
+    return new IdentifierNode(this._currentToken, this._currentToken.literal);
   }
 
-  private parsePrefixExpression(): Expression {
-    const exp = new PrefixExpression(
+  private parsePrefixExpression(): ExpressionNode {
+    const exp = new PrefixExpressionNode(
       this._currentToken,
       this._currentToken.literal,
     );
@@ -121,8 +121,8 @@ export class Parser {
     return exp;
   }
 
-  private parseInfixExpression(left: Expression): Expression {
-    const exp = new InfixExpression(
+  private parseInfixExpression(left: ExpressionNode): ExpressionNode {
+    const exp = new InfixExpressionNode(
       this._currentToken,
       this._currentToken.literal,
       left,
@@ -134,13 +134,13 @@ export class Parser {
     return exp;
   }
 
-  private parseExpression(precedence: Precedence): Expression {
+  private parseExpression(precedence: Precedence): ExpressionNode {
     const prefixParser = this._prefixParsers.get(this._currentToken.type);
     if (prefixParser === undefined) {
       this._errors.push(
         `no prefix parse function for ${this._currentToken.literal} found`,
       );
-      return new InvalidExpression();
+      return new InvalidExpressionNode();
     }
 
     let leftExpression = prefixParser();
@@ -172,11 +172,11 @@ export class Parser {
     return false;
   }
 
-  private parseGroupedExpression(): Expression {
+  private parseGroupedExpression(): ExpressionNode {
     this.nextToken();
     const exp = this.parseExpression(Precedence.LOWEST);
     if (!this.expectPeek(TokenType.RIGHT_PARENTHESIS)) {
-      return new InvalidExpression();
+      return new InvalidExpressionNode();
     }
     return exp;
   }
