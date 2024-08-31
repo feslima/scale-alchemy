@@ -1,7 +1,8 @@
 type Length = "Length";
 type Mass = "Mass";
 type Time = "Time";
-type Quantity = Length | Mass | Time;
+type Energy = "Energy";
+type Quantity = Length | Mass | Time | Energy;
 type Dimension = number[];
 
 export interface SimpleUnit<TQuantity extends Quantity> {
@@ -23,11 +24,6 @@ export interface CompositeUnit<
 export type Unit<Q extends Quantity[]> =
   | SimpleUnit<OneOf<Q>>
   | CompositeUnit<Q, Q>;
-
-const SystemBase = new Map<Quantity, Dimension>();
-SystemBase.set("Length", [1, 0, 0]);
-SystemBase.set("Mass", [0, 1, 0]);
-SystemBase.set("Time", [0, 0, 1]);
 
 export const Meter: SimpleUnit<Length> = {
   name: "meter",
@@ -64,6 +60,20 @@ export const Kilogram: SimpleUnit<Mass> = {
   synonyms: ["kg", "kilograms"],
 };
 
+export const Ton: SimpleUnit<Mass> = {
+  name: "ton",
+  quantity: "Mass",
+  factor: 1.0e3,
+  synonyms: ["ton", "mg", "tonnes", "megagrams"],
+};
+
+export const Gigagram: SimpleUnit<Mass> = {
+  name: "gigagram",
+  quantity: "Mass",
+  factor: 1.0e9,
+  synonyms: ["Gg", "gigagrams"],
+};
+
 export const Second: SimpleUnit<Time> = {
   name: "second",
   quantity: "Time",
@@ -78,21 +88,46 @@ export const Hour: SimpleUnit<Time> = {
   synonyms: ["h", "hours"],
 };
 
-/* ------------------------ Composite Units ------------------------*/
+export const Terajoule: SimpleUnit<Energy> = {
+  name: "terajoule",
+  quantity: "Energy",
+  factor: 1.0e12,
+  synonyms: ["TJ", "terajoules"],
+};
 
-// Velocity
-export const KiloMeterPerHour: CompositeUnit<[Length], [Time]> = {
+/* ------------------------ Composite Units ------------------------*/
+type VolumeQuantity = [Length, Length, Length];
+type Volume = CompositeUnit<VolumeQuantity, []>;
+type Velocity = CompositeUnit<[Length], [Time]>;
+type Force = CompositeUnit<[Length, Mass], [Time]>;
+type Density = CompositeUnit<[Mass], VolumeQuantity>;
+
+export const Stere: Volume = {
+  dividend: [Meter, Meter, Meter],
+  divisor: [],
+};
+
+export const KilogramPerStere: Density = {
+  dividend: [Kilogram],
+  divisor: [Meter, Meter, Meter],
+};
+
+export const TonPerStere: Density = {
+  dividend: [Ton],
+  divisor: [Meter, Meter, Meter],
+};
+
+export const KiloMeterPerHour: Velocity = {
   dividend: [Kilometer],
   divisor: [Hour],
 };
 
-export const MeterPerSecond: CompositeUnit<[Length], [Time]> = {
+export const MeterPerSecond: Velocity = {
   dividend: [Meter],
   divisor: [Second],
 };
 
-// Force
-export const Newton: CompositeUnit<[Length, Mass], [Time]> = {
+export const Newton: Force = {
   dividend: [Kilogram, Meter],
   divisor: [Second],
 };
@@ -119,6 +154,12 @@ function getFactor<T extends Quantity[]>(unit: Unit<T>): number {
 
   return dividendFactor / divisorFactor;
 }
+
+const SystemBase = new Map<Quantity, Dimension>();
+SystemBase.set("Length", [1, 0, 0, 0]);
+SystemBase.set("Mass", [0, 1, 0, 0]);
+SystemBase.set("Time", [0, 0, 1, 0]);
+SystemBase.set("Energy", [0, 0, 0, 1]);
 
 function analyze<S extends Quantity[], D extends Quantity[]>(
   source: Unit<S>,

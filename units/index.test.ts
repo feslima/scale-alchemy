@@ -7,6 +7,8 @@ import {
   Kilogram,
   KiloMeterPerHour,
   MeterPerSecond,
+  TonPerStere,
+  KilogramPerStere,
 } from ".";
 
 test.each([
@@ -25,4 +27,8 @@ test.each([
   [Kilogram, Meter, NaN],
 ])("composite conversion: convert(%j, %j) -> %i", (a, b, expected) => {
   expect(convert(a, b)).to.be.closeTo(expected, 1e-6);
+});
+
+test("tCH4/st", () => {
+  expect(convert(KilogramPerStere, TonPerStere)).to.be.closeTo(1e-3, 1e-6);
 });
