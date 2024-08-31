@@ -12,6 +12,7 @@ import {
   MeterPerSecond,
   Stere,
   Terajoule,
+  Ton,
   TonPerStere,
 } from ".";
 
@@ -56,27 +57,50 @@ test.each([
   },
 );
 
-test("tCH4/st from kg/st", () => {
-  const result = convert(KilogramPerStere, TonPerStere, testSystemBase);
-  expect(result).to.be.closeTo(1e-3, 1e-6);
+test("tCH4/st", () => {
+  const base: SystemBase = new Map();
+  base.set("Length", [1, 0, 0, 0, 0, 0]);
+  base.set("Mass", [0, 1, 0, 0, 0, 0]);
+  base.set("Time", [0, 0, 1, 0, 0, 0]);
+  base.set("Energy", [0, 0, 0, 1, 0, 0]);
+  base.set("Volume", [0, 0, 0, 0, 1, 0]);
+  base.set("Density", [0, 0, 0, 0, 0, 1]);
+
+  const inputUnit: CompositeUnit<[Mass, Mass, Energy], [Energy, Volume, Mass]> =
+    {
+      name: "unit we have",
+      synonyms: ["kg^2*TJ*TJ^-1*st^-1*Gg^-1"],
+      dividend: [Kilogram, Kilogram, Terajoule],
+      divisor: [Terajoule, Stere, Gigagram],
+    };
+  const desiredUnit: CompositeUnit<[Mass], [Volume]> = {
+    name: "unit we want",
+    synonyms: ["ton * st^-1"],
+    dividend: [Ton],
+    divisor: [Stere],
+  };
+
+  const result = 300 * 390 * 15.6 * convert(inputUnit, desiredUnit, base);
+  expect(result).to.be.closeTo(1.8252e-3, 1e-6);
 });
 
 test("MWh/st", () => {
   const base: SystemBase = new Map();
-  base.set("Length", [1, 0, 0, 0, 0]);
-  base.set("Mass", [0, 1, 0, 0, 0]);
-  base.set("Time", [0, 0, 1, 0, 0]);
-  base.set("Energy", [0, 0, 0, 1, 0]);
-  base.set("Volume", [0, 0, 0, 0, 1]);
+  base.set("Length", [1, 0, 0, 0, 0, 0]);
+  base.set("Mass", [0, 1, 0, 0, 0, 0]);
+  base.set("Time", [0, 0, 1, 0, 0, 0]);
+  base.set("Energy", [0, 0, 0, 1, 0, 0]);
+  base.set("Volume", [0, 0, 0, 0, 1, 0]);
+  base.set("Density", [0, 0, 0, 0, 0, 1]);
 
   const inputUnit: CompositeUnit<[Mass, Energy], [Mass, Volume]> = {
-    name: "emission factor we have",
+    name: "unit we have",
     synonyms: ["TJ * st^-1"],
     dividend: [Kilogram, Terajoule],
     divisor: [Gigagram, Stere],
   };
   const desiredUnit: CompositeUnit<[Energy], [Volume]> = {
-    name: "emission factor we want",
+    name: "unit we want",
     synonyms: ["MWh * st^-1"],
     dividend: [MegaWattHour],
     divisor: [Stere],
