@@ -5,18 +5,21 @@ type Energy = "Energy";
 type Quantity = Length | Mass | Time | Energy;
 type Dimension = number[];
 
-export interface SimpleUnit<TQuantity extends Quantity> {
+interface BasicUnitInfo {
   readonly name: string;
+  readonly synonyms: string[];
+}
+
+export interface SimpleUnit<TQuantity extends Quantity> extends BasicUnitInfo {
   readonly quantity: TQuantity;
   readonly factor: number;
-  readonly synonyms: string[];
 }
 type OneOf<T extends any[]> = T extends (infer U)[] ? U : never;
 
 export interface CompositeUnit<
   TDividend extends Quantity[],
   TDivisor extends Quantity[],
-> {
+> extends BasicUnitInfo {
   dividend: SimpleUnit<OneOf<TDividend>>[];
   divisor: SimpleUnit<OneOf<TDivisor>>[];
 }
@@ -103,31 +106,43 @@ type Force = CompositeUnit<[Length, Mass], [Time]>;
 type Density = CompositeUnit<[Mass], VolumeQuantity>;
 
 export const Stere: Volume = {
+  name: "stere",
+  synonyms: ["st", "steres"],
   dividend: [Meter, Meter, Meter],
   divisor: [],
 };
 
 export const KilogramPerStere: Density = {
+  name: "kilogram per stere",
+  synonyms: ["kg/st", "kg*st^-1"],
   dividend: [Kilogram],
   divisor: [Meter, Meter, Meter],
 };
 
 export const TonPerStere: Density = {
+  name: "ton per stere",
+  synonyms: ["ton/st", "ton*st^-1"],
   dividend: [Ton],
   divisor: [Meter, Meter, Meter],
 };
 
 export const KiloMeterPerHour: Velocity = {
+  name: "kilometer per hour",
+  synonyms: ["km/h", "km*h^-1"],
   dividend: [Kilometer],
   divisor: [Hour],
 };
 
 export const MeterPerSecond: Velocity = {
+  name: "meter per second",
+  synonyms: ["m/s", "m*s^-1"],
   dividend: [Meter],
   divisor: [Second],
 };
 
 export const Newton: Force = {
+  name: "newton",
+  synonyms: ["N", "newtons"],
   dividend: [Kilogram, Meter],
   divisor: [Second],
 };
@@ -135,7 +150,7 @@ export const Newton: Force = {
 function isSimpleUnit<T extends Quantity[]>(
   obj: Unit<T>,
 ): obj is SimpleUnit<OneOf<T>> {
-  return "name" in obj;
+  return "factor" in obj;
 }
 
 function getFactor<T extends Quantity[]>(unit: Unit<T>): number {
