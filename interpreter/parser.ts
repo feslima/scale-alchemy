@@ -1,12 +1,12 @@
-import { Lexer, Token, TokenType } from "./lexer";
 import {
   Expression,
   Identifier,
   InfixExpression,
   IntegerLiteral,
-  NullExpression,
+  InvalidExpression,
   PrefixExpression,
 } from "./ast";
+import { Lexer, Token, TokenType } from "./lexer";
 
 enum Precedence {
   LOWEST = 0,
@@ -75,11 +75,11 @@ export class Parser {
     );
   }
 
-  parse(): Expression | null {
+  parse(): Expression {
     return this.parseExpression(Precedence.LOWEST);
   }
 
-  nextToken() {
+  private nextToken() {
     this._currentToken = this._peekToken;
     this._peekToken = this._lexer.next();
   }
@@ -140,7 +140,7 @@ export class Parser {
       this._errors.push(
         `no prefix parse function for ${this._currentToken.literal} found`,
       );
-      return new NullExpression();
+      return new InvalidExpression();
     }
 
     let leftExpression = prefixParser();
@@ -176,7 +176,7 @@ export class Parser {
     this.nextToken();
     const exp = this.parseExpression(Precedence.LOWEST);
     if (!this.expectPeek(TokenType.RIGHT_PARENTHESIS)) {
-      return new NullExpression();
+      return new InvalidExpression();
     }
     return exp;
   }

@@ -2,26 +2,20 @@ import { Token, TokenType } from "./lexer";
 
 export abstract class Expression {
   private _token: Token;
-  private _isNull: boolean;
-
-  constructor(token: Token, isNull = false) {
-    this._token = token;
-    this._isNull = isNull;
-  }
-
   public get token(): Token {
     return this._token;
   }
-  public get isNull(): boolean {
-    return this._isNull;
+
+  constructor(token: Token) {
+    this._token = token;
   }
 
   public abstract toString(): string;
 }
 
-export class NullExpression extends Expression {
+export class InvalidExpression extends Expression {
   constructor() {
-    super({ type: TokenType.ILLEGAL, literal: "" }, true);
+    super({ type: TokenType.ILLEGAL, literal: "" });
   }
   public toString(): string {
     return "(null)";
@@ -65,12 +59,12 @@ export class InfixExpression extends Expression {
     return this._left;
   }
 
-  private _right: Expression | null;
-  public get right(): Expression | null {
+  private _right: Expression;
+  public get right(): Expression {
     return this._right;
   }
 
-  public set right(v: Expression | null) {
+  public set right(v: Expression) {
     this._right = v;
   }
 
@@ -78,7 +72,7 @@ export class InfixExpression extends Expression {
     super(token);
     this._operator = operator;
     this._left = left;
-    this._right = null;
+    this._right = new InvalidExpression();
   }
 
   public toString(): string {
@@ -92,18 +86,18 @@ export class PrefixExpression extends Expression {
     return this._operator;
   }
 
-  private _right: Expression | null;
-  public get right(): Expression | null {
+  private _right: Expression;
+  public get right(): Expression {
     return this._right;
   }
-  public set right(v: Expression | null) {
+  public set right(v: Expression) {
     this._right = v;
   }
 
   constructor(token: Token, operator: string) {
     super(token);
     this._operator = operator;
-    this._right = null;
+    this._right = new InvalidExpression();
   }
 
   public toString(): string {
