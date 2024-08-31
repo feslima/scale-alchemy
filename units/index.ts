@@ -1,33 +1,3 @@
-type Length = "Length";
-type Mass = "Mass";
-type Time = "Time";
-type Energy = "Energy";
-type Quantity = Length | Mass | Time | Energy;
-type Dimension = number[];
-
-interface BasicUnitInfo {
-  readonly name: string;
-  readonly synonyms: string[];
-}
-
-export interface SimpleUnit<TQuantity extends Quantity> extends BasicUnitInfo {
-  readonly quantity: TQuantity;
-  readonly factor: number;
-}
-type OneOf<T extends any[]> = T extends (infer U)[] ? U : never;
-
-export interface CompositeUnit<
-  TDividend extends Quantity[],
-  TDivisor extends Quantity[],
-> extends BasicUnitInfo {
-  dividend: SimpleUnit<OneOf<TDividend>>[];
-  divisor: SimpleUnit<OneOf<TDivisor>>[];
-}
-
-export type Unit<Q extends Quantity[]> =
-  | SimpleUnit<OneOf<Q>>
-  | CompositeUnit<Q, Q>;
-
 export const Meter: SimpleUnit<Length> = {
   name: "meter",
   quantity: "Length",
@@ -184,22 +154,16 @@ function getFactor<T extends Quantity[]>(unit: Unit<T>): number {
   return dividendFactor / divisorFactor;
 }
 
-const SystemBase = new Map<Quantity, Dimension>();
-SystemBase.set("Length", [1, 0, 0, 0]);
-SystemBase.set("Mass", [0, 1, 0, 0]);
-SystemBase.set("Time", [0, 0, 1, 0]);
-SystemBase.set("Energy", [0, 0, 0, 1]);
-
 function getDimensionFromCompositeUnit<
   QDividend extends Quantity[],
   QDivisor extends Quantity[],
->(unit: CompositeUnit<QDividend, QDivisor>): Dimension {
+>(unit: CompositeUnit<QDividend, QDivisor>, base: SystemBase): Dimension {
   let result: Dimension = [];
   let dividendDimension: Dimension = [];
   let divisorDimension: Dimension = [];
 
   unit.dividend.forEach((u) => {
-    const dim = SystemBase.get(u.quantity);
+    const dim = base.get(u.quantity);
     if (dividendDimension.length === 0 && dim !== undefined) {
       dividendDimension = Array(dim.length).fill(0);
     }
@@ -211,7 +175,7 @@ function getDimensionFromCompositeUnit<
   });
 
   unit.divisor.forEach((u) => {
-    const dim = SystemBase.get(u.quantity);
+    const dim = base.get(u.quantity);
     if (divisorDimension.length === 0 && dim !== undefined) {
       divisorDimension = Array(dim.length).fill(0);
     }
@@ -242,6 +206,7 @@ function getDimensionFromCompositeUnit<
 function analyze<S extends Quantity[], D extends Quantity[]>(
   source: Unit<S>,
   destination: Unit<D>,
+  base: SystemBase,
 ): boolean {
   const isSourceSimple = isSimpleUnit<S>(source);
   const isDestinationSimple = isSimpleUnit<D>(destination);
@@ -250,9 +215,9 @@ function analyze<S extends Quantity[], D extends Quantity[]>(
   let dDim: Dimension;
 
   if (!isSourceSimple) {
-    sDim = getDimensionFromCompositeUnit(source);
+    sDim = getDimensionFromCompositeUnit(source, base);
   } else {
-    const dim = SystemBase.get(source.quantity);
+    const dim = base.get(source.quantity);
     if (dim === undefined) {
       return false;
     }
@@ -260,9 +225,9 @@ function analyze<S extends Quantity[], D extends Quantity[]>(
   }
 
   if (!isDestinationSimple) {
-    dDim = getDimensionFromCompositeUnit(destination);
+    dDim = getDimensionFromCompositeUnit(destination, base);
   } else {
-    const dim = SystemBase.get(destination.quantity);
+    const dim = base.get(destination.quantity);
     if (dim === undefined) {
       return false;
     }
@@ -276,11 +241,23 @@ function analyze<S extends Quantity[], D extends Quantity[]>(
   return sum.every((e) => e === 0);
 }
 
+export class Converter {
+  private _systemBase: SystemBase = new Map();
+
+  constructor() {
+    this._systemBase.set("Length", [1, 0, 0, 0]);
+    this._systemBase.set("Mass", [0, 1, 0, 0]);
+    this._systemBase.set("Time", [0, 0, 1, 0]);
+    this._systemBase.set("Energy", [0, 0, 0, 1]);
+  }
+}
+
 export function convert<S extends Quantity, D extends Quantity>(
   source: Unit<S[]>,
   destination: Unit<D[]>,
+  base: SystemBase,
 ): number {
-  if (!analyze(source, destination)) {
+  if (!analyze(source, destination, base)) {
     return NaN;
   }
   return getFactor(source) / getFactor(destination);
