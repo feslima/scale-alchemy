@@ -161,16 +161,98 @@ SystemBase.set("Mass", [0, 1, 0, 0]);
 SystemBase.set("Time", [0, 0, 1, 0]);
 SystemBase.set("Energy", [0, 0, 0, 1]);
 
+function getDimensionFromCompositeUnit<
+  QDividend extends Quantity[],
+  QDivisor extends Quantity[],
+>(unit: CompositeUnit<QDividend, QDivisor>): Dimension {
+  let result: Dimension = [];
+  let dividendDimension: Dimension = [];
+  let divisorDimension: Dimension = [];
+
+  unit.dividend.forEach((u) => {
+    const dim = SystemBase.get(u.quantity);
+    if (dividendDimension.length === 0 && dim !== undefined) {
+      dividendDimension = Array(dim.length).fill(0);
+    }
+    dim?.forEach((d, index) => {
+      if (d !== 0) {
+        dividendDimension[index] += d;
+      }
+    });
+  });
+
+  unit.divisor.forEach((u) => {
+    const dim = SystemBase.get(u.quantity);
+    if (divisorDimension.length === 0 && dim !== undefined) {
+      divisorDimension = Array(dim.length).fill(0);
+    }
+    dim?.forEach((d, index) => {
+      if (d !== 0) {
+        divisorDimension[index] += d;
+      }
+    });
+  });
+
+  result = Array(dividendDimension.length ?? divisorDimension.length).fill(0);
+  for (let i = 0; i < dividendDimension.length; i++) {
+    result[i] += dividendDimension[i];
+    result[i] -= divisorDimension[i];
+  }
+
+  return result;
+}
+
+/**
+ * It can be verified that the conversion from one unit to another
+ * is legitimate by showing that the dimension vectors of the two
+ * units are equal (i.e.: their difference is a zero vector).
+ * @param source - unit to be converted from;
+ * @param destination - unit to convert into;
+ * @returns true if the conversion is allowed, otherwise false.
+ */
 function analyze<S extends Quantity[], D extends Quantity[]>(
   source: Unit<S>,
   destination: Unit<D>,
 ): boolean {
-  return false;
+  const isSourceSimple = isSimpleUnit<S>(source);
+  const isDestinationSimple = isSimpleUnit<D>(destination);
+
+  let sDim: Dimension;
+  let dDim: Dimension;
+
+  if (!isSourceSimple) {
+    sDim = getDimensionFromCompositeUnit(source);
+  } else {
+    const dim = SystemBase.get(source.quantity);
+    if (dim === undefined) {
+      return false;
+    }
+    sDim = dim;
+  }
+
+  if (!isDestinationSimple) {
+    dDim = getDimensionFromCompositeUnit(destination);
+  } else {
+    const dim = SystemBase.get(destination.quantity);
+    if (dim === undefined) {
+      return false;
+    }
+    dDim = dim;
+  }
+
+  let sum = Array(sDim.length ?? dDim.length).fill(0);
+  for (let i = 0; i < sDim.length; i++) {
+    sum[i] = sDim[i] - dDim[i];
+  }
+  return sum.every((e) => e === 0);
 }
 
 export function convert<S extends Quantity, D extends Quantity>(
   source: Unit<S[]>,
   destination: Unit<D[]>,
 ): number {
+  if (!analyze(source, destination)) {
+    return NaN;
+  }
   return getFactor(source) / getFactor(destination);
 }

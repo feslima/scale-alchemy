@@ -1,14 +1,14 @@
 import { expect, test } from "vitest";
 import {
+  Centimeter,
   convert,
   Foot,
-  Centimeter,
-  Meter,
   Kilogram,
+  KilogramPerStere,
   KiloMeterPerHour,
+  Meter,
   MeterPerSecond,
   TonPerStere,
-  KilogramPerStere,
 } from ".";
 
 test.each([
@@ -18,7 +18,12 @@ test.each([
   [MeterPerSecond, KiloMeterPerHour, 3.6],
   [KiloMeterPerHour, MeterPerSecond, 1 / 3.6],
 ])("simple conversion: convert(%j, %j) -> %f", (a, b, expected) => {
-  expect(convert(a, b)).to.be.closeTo(expected, 1e-6);
+  const result = convert(a, b);
+  if (isNaN(expected)) {
+    expect(result).to.be.NaN;
+  } else {
+    expect(result).to.be.closeTo(expected, 1e-6);
+  }
 });
 
 test.each([
@@ -26,7 +31,12 @@ test.each([
   [KiloMeterPerHour, MeterPerSecond, 1 / 3.6],
   [Kilogram, Meter, NaN],
 ])("composite conversion: convert(%j, %j) -> %i", (a, b, expected) => {
-  expect(convert(a, b)).to.be.closeTo(expected, 1e-6);
+  const result = convert(a, b);
+  if (isNaN(expected)) {
+    expect(result).to.be.NaN;
+  } else {
+    expect(result).to.be.closeTo(expected, 1e-6);
+  }
 });
 
 test("tCH4/st", () => {
