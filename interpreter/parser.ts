@@ -1,6 +1,6 @@
 import {
   ExpressionNode,
-  IdentifierNode,
+  IdentifierExpressionNode,
   InfixExpressionNode,
   IntegerLiteralNode,
   InvalidExpressionNode,
@@ -98,6 +98,18 @@ export class Parser {
     return p !== undefined ? p : Precedence.LOWEST;
   }
 
+  private expectPeek(token: TokenType): boolean {
+    if (this.peekTokenIs(token)) {
+      this.nextToken();
+      return true;
+    }
+
+    this._errors.push(
+      `expected next token to be ${token}, got ${this._peekToken.type} instead`,
+    );
+    return false;
+  }
+
   private parseInteger(): ExpressionNode {
     return new IntegerLiteralNode(
       this._currentToken,
@@ -106,7 +118,10 @@ export class Parser {
   }
 
   private parseIdentifier(): ExpressionNode {
-    return new IdentifierNode(this._currentToken, this._currentToken.literal);
+    return new IdentifierExpressionNode(
+      this._currentToken,
+      this._currentToken.literal,
+    );
   }
 
   private parsePrefixExpression(): ExpressionNode {
@@ -158,18 +173,6 @@ export class Parser {
     }
 
     return leftExpression;
-  }
-
-  private expectPeek(token: TokenType): boolean {
-    if (this.peekTokenIs(token)) {
-      this.nextToken();
-      return true;
-    }
-
-    this._errors.push(
-      `expected next token to be ${token}, got ${this._peekToken.type} instead`,
-    );
-    return false;
   }
 
   private parseGroupedExpression(): ExpressionNode {
