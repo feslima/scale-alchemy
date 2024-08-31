@@ -91,6 +91,13 @@ export const Hour: SimpleUnit<Time> = {
   synonyms: ["h", "hours"],
 };
 
+export const Megajoule: SimpleUnit<Energy> = {
+  name: "megajoule",
+  quantity: "Energy",
+  factor: 1.0e6,
+  synonyms: ["MJ", "megajoules"],
+};
+
 export const Terajoule: SimpleUnit<Energy> = {
   name: "terajoule",
   quantity: "Energy",
@@ -104,6 +111,13 @@ type Volume = CompositeUnit<VolumeQuantity, []>;
 type Velocity = CompositeUnit<[Length], [Time]>;
 type Force = CompositeUnit<[Length, Mass], [Time]>;
 type Density = CompositeUnit<[Mass], VolumeQuantity>;
+
+export const MegaWattHour: CompositeUnit<[Energy, Time], [Time]> = {
+  name: "megawatthour",
+  synonyms: ["MWh", "megawatthours"],
+  dividend: [Megajoule, Hour],
+  divisor: [Second],
+};
 
 export const Stere: Volume = {
   name: "stere",

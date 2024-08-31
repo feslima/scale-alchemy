@@ -6,8 +6,10 @@ import {
   Kilogram,
   KilogramPerStere,
   KiloMeterPerHour,
+  MegaWattHour,
   Meter,
   MeterPerSecond,
+  Terajoule,
   TonPerStere,
 } from ".";
 
@@ -31,6 +33,7 @@ test.each([
   { source: MeterPerSecond, destination: KiloMeterPerHour, expected: 3.6 },
   { source: KiloMeterPerHour, destination: MeterPerSecond, expected: 1 / 3.6 },
   { source: Kilogram, destination: Meter, expected: NaN },
+  { source: Terajoule, destination: MegaWattHour, expected: 1e6 / 3600 },
 ])(
   "composite conversion: $source.name to $destination.name -> %i",
   ({ source, destination, expected }) => {
