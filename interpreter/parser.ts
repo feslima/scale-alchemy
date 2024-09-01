@@ -76,7 +76,42 @@ export class Parser {
   }
 
   parse(): ExpressionNode {
-    return this.parseExpression(Precedence.LOWEST);
+    const expression = this.parseExpression(Precedence.LOWEST);
+
+    if (this.errors.length !== 0) {
+      return expression;
+    }
+
+    if (!this.expectPeek(TokenType.EOF)) {
+      return new InvalidExpressionNode(this._peekToken.literal);
+    }
+    return expression;
+  }
+
+  private parseExpression(precedence: Precedence): ExpressionNode {
+    const prefixParser = this._prefixParsers.get(this._currentToken.type);
+    if (prefixParser === undefined) {
+      this._errors.push(
+        `no prefix parse function for ${this._currentToken.literal} found`,
+      );
+      return new InvalidExpressionNode(this._currentToken.literal);
+    }
+
+    let leftExpression = prefixParser();
+    while (
+      !this.peekTokenIs(TokenType.EOF) &&
+      precedence < this.peekPrecedence()
+    ) {
+      const infixParser = this._infixParsers.get(this._peekToken.type);
+      if (infixParser === undefined) {
+        return leftExpression;
+      }
+
+      this.nextToken();
+      leftExpression = infixParser(leftExpression);
+    }
+
+    return leftExpression;
   }
 
   private nextToken() {
@@ -104,9 +139,12 @@ export class Parser {
       return true;
     }
 
-    this._errors.push(
-      `expected next token to be ${token}, got ${this._peekToken.type} instead`,
-    );
+    let msg = `expected next token to be ${token}, got ${this._peekToken.type} instead`;
+    if (this.peekTokenIs(TokenType.ILLEGAL)) {
+      msg = `${msg} because ${this._peekToken.literal}`;
+    }
+
+    this._errors.push(msg);
     return false;
   }
 
@@ -149,37 +187,11 @@ export class Parser {
     return exp;
   }
 
-  private parseExpression(precedence: Precedence): ExpressionNode {
-    const prefixParser = this._prefixParsers.get(this._currentToken.type);
-    if (prefixParser === undefined) {
-      this._errors.push(
-        `no prefix parse function for ${this._currentToken.literal} found`,
-      );
-      return new InvalidExpressionNode();
-    }
-
-    let leftExpression = prefixParser();
-    while (
-      !this.peekTokenIs(TokenType.EOF) &&
-      precedence < this.peekPrecedence()
-    ) {
-      const infixParser = this._infixParsers.get(this._peekToken.type);
-      if (infixParser === undefined) {
-        return leftExpression;
-      }
-
-      this.nextToken();
-      leftExpression = infixParser(leftExpression);
-    }
-
-    return leftExpression;
-  }
-
   private parseGroupedExpression(): ExpressionNode {
     this.nextToken();
     const exp = this.parseExpression(Precedence.LOWEST);
     if (!this.expectPeek(TokenType.RIGHT_PARENTHESIS)) {
-      return new InvalidExpressionNode();
+      return new InvalidExpressionNode(this._peekToken.literal);
     }
     return exp;
   }

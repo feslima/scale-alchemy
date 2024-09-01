@@ -22,11 +22,18 @@ export interface Token {
   literal: string;
 }
 
+const MISSING_PARENTHESIS_TOKEN: Token = {
+  type: TokenType.ILLEGAL,
+  literal: "parenthesis missing matching pair",
+};
+
 export class Lexer {
   private _input: string;
   private _position: number;
   private _readPosition: number;
   private _currentChar: string;
+
+  private _parenthesisTracker: number[] = [];
 
   /* NOTE: next char has to be one of operator, EOF or
    * closing parenthesis to constitute a valid number */
@@ -67,17 +74,27 @@ export class Lexer {
           type: TokenType.LEFT_PARENTHESIS,
           literal: this._currentChar,
         };
+        this._parenthesisTracker.push(1);
         break;
 
       case ")":
-        result = {
-          type: TokenType.RIGHT_PARENTHESIS,
-          literal: this._currentChar,
-        };
+        if (this._parenthesisTracker.length !== 0) {
+          result = {
+            type: TokenType.RIGHT_PARENTHESIS,
+            literal: this._currentChar,
+          };
+          this._parenthesisTracker.pop();
+        } else {
+          result = MISSING_PARENTHESIS_TOKEN;
+        }
         break;
 
       case "":
-        result = { type: TokenType.EOF, literal: this._currentChar };
+        if (this._parenthesisTracker.length === 0) {
+          result = { type: TokenType.EOF, literal: this._currentChar };
+        } else {
+          result = MISSING_PARENTHESIS_TOKEN;
+        }
         break;
       default:
         if (this.isLetter(this._currentChar)) {

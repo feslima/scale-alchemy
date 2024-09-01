@@ -27,3 +27,34 @@ test.each([
   expect(expression).to.not.be.null;
   expect(expression!.toString()).to.be.equal(expected);
 });
+
+test.each([
+  {
+    input: "(a * b",
+    expected: "(null)",
+    error:
+      "expected next token to be ), got ILLEGAL instead because parenthesis missing matching pair",
+  },
+  {
+    input: "a * b)",
+    expected: "(null)",
+    error:
+      "expected next token to be EOF, got ILLEGAL instead because parenthesis missing matching pair",
+  },
+  {
+    input: "a + b * c + d) / e - f",
+    expected: "(null)",
+    error:
+      "expected next token to be EOF, got ILLEGAL instead because parenthesis missing matching pair",
+  },
+])("test parenthesis validation: $input", ({ input, expected, error }) => {
+  const lexer = new Lexer(input);
+  const parser = new Parser(lexer);
+
+  const expression = parser.parse();
+  expect(expression).to.not.be.null;
+  expect(expression!.toString()).to.be.equal(expected);
+
+  expect(parser.errors).to.have.lengthOf(1);
+  expect(parser.errors[0]).to.be.equal(error);
+});

@@ -1,13 +1,13 @@
 import { Token, TokenType } from "./lexer";
 
 type InvalidNode = "Invalid";
-type IntegerNode = "Integer";
+type NumberNode = "Number";
 type IdentifierNode = "Identifier";
 type PrefixNode = "Prefix";
 type InfixNode = "Infix";
 type ExpressionNodeType =
   | InvalidNode
-  | IntegerNode
+  | NumberNode
   | IdentifierNode
   | PrefixNode
   | InfixNode;
@@ -32,8 +32,8 @@ export abstract class ExpressionNode {
 }
 
 export class InvalidExpressionNode extends ExpressionNode {
-  constructor() {
-    super({ type: TokenType.ILLEGAL, literal: "" }, "Invalid");
+  constructor(literal: string) {
+    super({ type: TokenType.ILLEGAL, literal: literal }, "Invalid");
   }
   public toString(): string {
     return "(null)";
@@ -47,7 +47,7 @@ export class NumberLiteralNode extends ExpressionNode {
   }
 
   constructor(token: Token, value: number) {
-    super(token, "Integer");
+    super(token, "Number");
     this._value = value;
   }
 
@@ -89,7 +89,7 @@ export class PrefixExpressionNode extends ExpressionNode {
   constructor(token: Token, operator: string) {
     super(token, "Prefix");
     this._operator = operator;
-    this._right = new InvalidExpressionNode();
+    this._right = new InvalidExpressionNode(token.literal);
   }
 
   public toString(): string {
@@ -121,7 +121,7 @@ export class InfixExpressionNode extends ExpressionNode {
     super(token, "Infix");
     this._operator = operator;
     this._left = left;
-    this._right = new InvalidExpressionNode();
+    this._right = new InvalidExpressionNode(token.literal);
   }
 
   public toString(): string {

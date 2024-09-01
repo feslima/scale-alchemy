@@ -70,7 +70,7 @@ export class Evaluator {
 
   public evaluate(node: ExpressionNode): ValueObject {
     switch (node.type) {
-      case "Integer":
+      case "Number":
         return new NumberValue((node as NumberLiteralNode).value);
 
       case "Identifier": {
