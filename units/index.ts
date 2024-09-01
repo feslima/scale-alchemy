@@ -151,7 +151,7 @@ function getFactor<T extends Quantity[]>(unit: Unit<T>): number {
   return dividendFactor / divisorFactor;
 }
 
-function getDimensionFromCompositeUnit<
+export function getDimensionFromCompositeUnit<
   QDividend extends Quantity[],
   QDivisor extends Quantity[],
 >(unit: CompositeUnit<QDividend, QDivisor>, base: SystemBase): Dimension {
@@ -192,6 +192,26 @@ function getDimensionFromCompositeUnit<
   return result;
 }
 
+export function getDimensionFromUnit<Q extends Quantity[]>(
+  unit: Unit<Q>,
+  base: SystemBase,
+): Dimension | undefined {
+  const isSimple = isSimpleUnit<Q>(unit);
+  let dim: Dimension = Array(base.size).fill(0);
+
+  if (!isSimple) {
+    dim = getDimensionFromCompositeUnit(unit, base);
+  } else {
+    const tmpDim = base.get(unit.quantity);
+    if (tmpDim === undefined) {
+      return tmpDim;
+    }
+    dim = tmpDim;
+  }
+
+  return dim;
+}
+
 /**
  * It can be verified that the conversion from one unit to another
  * is legitimate by showing that the dimension vectors of the two
@@ -200,38 +220,18 @@ function getDimensionFromCompositeUnit<
  * @param destination - unit to convert into;
  * @returns true if the conversion is allowed, otherwise false.
  */
-function analyze<S extends Quantity[], D extends Quantity[]>(
+export function analyze<S extends Quantity[], D extends Quantity[]>(
   source: Unit<S>,
   destination: Unit<D>,
   base: SystemBase,
 ): boolean {
-  const isSourceSimple = isSimpleUnit<S>(source);
-  const isDestinationSimple = isSimpleUnit<D>(destination);
-
-  let sDim: Dimension;
-  let dDim: Dimension;
-
-  if (!isSourceSimple) {
-    sDim = getDimensionFromCompositeUnit(source, base);
-  } else {
-    const dim = base.get(source.quantity);
-    if (dim === undefined) {
-      return false;
-    }
-    sDim = dim;
+  const sDim = getDimensionFromUnit<S>(source, base);
+  const dDim = getDimensionFromUnit<D>(destination, base);
+  if (sDim === undefined || dDim === undefined) {
+    return false;
   }
 
-  if (!isDestinationSimple) {
-    dDim = getDimensionFromCompositeUnit(destination, base);
-  } else {
-    const dim = base.get(destination.quantity);
-    if (dim === undefined) {
-      return false;
-    }
-    dDim = dim;
-  }
-
-  let sum = Array(sDim.length ?? dDim.length).fill(0);
+  let sum = Array(base.size).fill(0);
   for (let i = 0; i < sDim.length; i++) {
     sum[i] = sDim[i] - dDim[i];
   }
