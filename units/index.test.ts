@@ -15,6 +15,7 @@ import {
 } from ".";
 
 const testSystemBase: SystemBase = new Map();
+testSystemBase.set("Dimensionless", [0, 0, 0, 0, 0, 0]);
 testSystemBase.set("Length", [1, 0, 0, 0, 0, 0]);
 testSystemBase.set("Mass", [0, 1, 0, 0, 0, 0]);
 testSystemBase.set("Time", [0, 0, 1, 0, 0, 0]);

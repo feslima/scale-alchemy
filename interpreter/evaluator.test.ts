@@ -1,4 +1,4 @@
-import { expect, expectTypeOf, test } from "vitest";
+import { expect, test } from "vitest";
 import {
   ErrorValue,
   EvaluationEnvironmentType,
@@ -59,11 +59,11 @@ test.each([
     );
 
     const result = evaluator.evaluate(expressionTree);
-    expectTypeOf(result).toEqualTypeOf(expected);
     if (expected instanceof ErrorValue) {
       expect(result).instanceof(ErrorValue);
       expect(result).to.have.property("message").be.equal(expected.message);
     } else {
+      expect(result.constructor.name).to.be.equal(expected.constructor.name);
       expect(result.equals(expected)).to.be.true;
     }
   },

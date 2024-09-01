@@ -1,3 +1,4 @@
+import { combineUnits, convert } from "../units";
 import {
   ExpressionNode,
   IdentifierExpressionNode,
@@ -58,9 +59,114 @@ export class NumberValue extends ValueObject {
       ? Math.abs(this._value - other._value) <= this._precision
       : false;
   }
+
+  public static evaluate(
+    operator: string,
+    left: NumberValue,
+    right: NumberValue,
+  ): ValueObject {
+    switch (operator) {
+      case "+":
+        return new NumberValue(left.value + right.value);
+      case "-":
+        return new NumberValue(left.value - right.value);
+      case "*":
+        return new NumberValue(left.value * right.value);
+      case "/":
+        return new NumberValue(left.value / right.value);
+
+      default:
+        return new ErrorValue(`invalid infix operator provided ${operator}`);
+    }
+  }
 }
 
-export type EvaluationEnvironmentType = Map<string, ValueObject>;
+export class NumberWithUnitValue extends ValueObject {
+  private _precision: number;
+  private _base: SystemBase;
+  private static _supportedOperators = new Set(["+", "-", "*", "/"]);
+
+  private _unit: Unit<Quantity[]>;
+  public get unit(): Unit<Quantity[]> {
+    return this._unit;
+  }
+
+  private _value: number;
+  public get value(): number {
+    return this._value;
+  }
+
+  constructor(
+    value: number,
+    unit: Unit<Quantity[]>,
+    base: SystemBase,
+    precision = 7,
+  ) {
+    super(ObjectType.NUMBER);
+    this._value = value;
+    this._precision = precision;
+    this._unit = unit;
+    this._base = base;
+  }
+
+  public equals(other: object): boolean {
+    if (other instanceof NumberWithUnitValue) {
+      const factor = convert(this.unit, other.unit, this._base);
+      if (isNaN(factor)) {
+        return false;
+      }
+
+      return Math.abs(this.value * factor - other.value) <= this._precision;
+    }
+
+    return false;
+  }
+
+  public static evaluate(
+    operator: string,
+    left: NumberWithUnitValue,
+    right: NumberWithUnitValue,
+  ): ValueObject {
+    if (!this._supportedOperators.has(operator)) {
+      return new ErrorValue(`operator '${operator}' not supported`);
+    }
+
+    switch (operator) {
+      case "+": {
+        const factor = convert(left.unit, right.unit, left._base);
+        if (isNaN(factor)) {
+          return new ErrorValue(
+            `units '${left.unit.name}' and '${right.unit.name}' are incompatible`,
+          );
+        }
+        const result = left.value * factor + right.value;
+        return new NumberWithUnitValue(result, right.unit, right._base);
+      }
+      case "-": {
+        const factor = convert(left.unit, right.unit, left._base);
+        if (isNaN(factor)) {
+          return new ErrorValue(
+            `units '${left.unit.name}' and '${right.unit.name}' are incompatible`,
+          );
+        }
+        const result = left.value * factor - right.value;
+        return new NumberWithUnitValue(result, right.unit, right._base);
+      }
+      case "*": {
+        const result = left.value * right.value;
+        const unit = combineUnits(left.unit, right.unit);
+        return new NumberWithUnitValue(result, unit, right._base);
+      }
+      default: {
+        const result = left.value / right.value;
+        const unit = combineUnits(left.unit, right.unit);
+        return new NumberWithUnitValue(result, unit, right._base);
+      }
+    }
+  }
+}
+
+export type EvaluationEnvironmentType = Map<string, NumberWithUnitValue>;
 
 export class Evaluator {
   private _environment: EvaluationEnvironmentType;
@@ -70,9 +176,15 @@ export class Evaluator {
 
   public evaluate(node: ExpressionNode): ValueObject {
     switch (node.type) {
-      case "Number":
-        return new NumberValue((node as NumberLiteralNode).value);
+      case "Number": {
+        if (!(node instanceof NumberLiteralNode)) {
+          return new ErrorValue(
+            "node type does not match with number literal node",
+          );
+        }
 
+        return new NumberValue(node.value);
+      }
       case "Identifier": {
         if (!(node instanceof IdentifierExpressionNode)) {
           return new ErrorValue(
@@ -142,13 +254,18 @@ export class Evaluator {
     left: ValueObject,
     right: ValueObject,
   ): ValueObject {
-    if (!(left instanceof NumberValue) || !(right instanceof NumberValue)) {
-      return new ErrorValue(
-        `both objects must be numbers. Left type: ${ObjectType[left.type]}, right type: ${ObjectType[right.type]}`,
-      );
+    if (left instanceof NumberValue && right instanceof NumberValue) {
+      return this.evalNumberInfixExpression(operator, left, right);
+    } else if (
+      left instanceof NumberWithUnitValue &&
+      right instanceof NumberWithUnitValue
+    ) {
+      return this.evalNumberWithUnitInfixExpression(operator, left, right);
     }
 
-    return this.evalNumberInfixExpression(operator, left, right);
+    return new ErrorValue(
+      `both objects must be numbers with units. Left type: ${ObjectType[left.type]}, right type: ${ObjectType[right.type]}`,
+    );
   }
 
   private evalNumberInfixExpression(
@@ -156,18 +273,14 @@ export class Evaluator {
     left: NumberValue,
     right: NumberValue,
   ): ValueObject {
-    switch (operator) {
-      case "+":
-        return new NumberValue(left.value + right.value);
-      case "-":
-        return new NumberValue(left.value - right.value);
-      case "*":
-        return new NumberValue(left.value * right.value);
-      case "/":
-        return new NumberValue(left.value / right.value);
+    return NumberValue.evaluate(operator, left, right);
+  }
 
-      default:
-        return new ErrorValue(`invalid infix operator provided ${operator}`);
-    }
+  private evalNumberWithUnitInfixExpression(
+    operator: string,
+    left: NumberWithUnitValue,
+    right: NumberWithUnitValue,
+  ): ValueObject {
+    return NumberWithUnitValue.evaluate(operator, left, right);
   }
 }

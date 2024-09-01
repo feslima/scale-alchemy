@@ -151,6 +151,46 @@ function getFactor<T extends Quantity[]>(unit: Unit<T>): number {
   return dividendFactor / divisorFactor;
 }
 
+export function extractUnits(
+  unit: Unit<Quantity[]>,
+): [SimpleUnit<Quantity>[], SimpleUnit<Quantity>[]] {
+  const dividend: SimpleUnit<Quantity>[] = [];
+  const divisor: SimpleUnit<Quantity>[] = [];
+
+  if (isSimpleUnit(unit)) {
+    dividend.push(unit);
+  } else {
+    unit.dividend.forEach((u) => dividend.push(u));
+    unit.divisor.forEach((u) => divisor.push(u));
+  }
+
+  return [dividend, divisor];
+}
+
+export function combineUnits(
+  first: Unit<Quantity[]>,
+  second: Unit<Quantity[]>,
+): CompositeUnit<Quantity[], Quantity[]> {
+  const [dividendFirst, divisorFirst] = extractUnits(first);
+  const [dividendSecond, divisorSecond] = extractUnits(second);
+
+  const dividend: SimpleUnit<Quantity>[] = [];
+  const divisor: SimpleUnit<Quantity>[] = [];
+
+  dividendFirst.forEach((unit) => dividend.push(unit));
+  dividendSecond.forEach((unit) => dividend.push(unit));
+
+  divisorFirst.forEach((unit) => divisor.push(unit));
+  divisorSecond.forEach((unit) => divisor.push(unit));
+
+  return {
+    name: "generated",
+    synonyms: ["to be done"],
+    dividend,
+    divisor,
+  };
+}
+
 export function getDimensionFromCompositeUnit<
   QDividend extends Quantity[],
   QDivisor extends Quantity[],
@@ -218,6 +258,7 @@ export function getDimensionFromUnit<Q extends Quantity[]>(
  * units are equal (i.e.: their difference is a zero vector).
  * @param source - unit to be converted from;
  * @param destination - unit to convert into;
+ * @param base - base of dimensional vectors that represents the system of units
  * @returns true if the conversion is allowed, otherwise false.
  */
 export function analyze<S extends Quantity[], D extends Quantity[]>(
@@ -253,8 +294,9 @@ export function convert<S extends Quantity, D extends Quantity>(
   source: Unit<S[]>,
   destination: Unit<D[]>,
   base: SystemBase,
+  skipValidation = false,
 ): number {
-  if (!analyze(source, destination, base)) {
+  if (!skipValidation && !analyze(source, destination, base)) {
     return NaN;
   }
   return getFactor(source) / getFactor(destination);
