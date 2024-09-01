@@ -40,7 +40,7 @@ export class InvalidExpressionNode extends ExpressionNode {
   }
 }
 
-export class IntegerLiteralNode extends ExpressionNode {
+export class NumberLiteralNode extends ExpressionNode {
   private _value: number;
   public get value(): number {
     return this._value;

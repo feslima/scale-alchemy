@@ -5,7 +5,6 @@ import {
   Foot,
   Gigagram,
   Kilogram,
-  KilogramPerStere,
   KiloMeterPerHour,
   MegaWattHour,
   Meter,
@@ -13,7 +12,6 @@ import {
   Stere,
   Terajoule,
   Ton,
-  TonPerStere,
 } from ".";
 
 const testSystemBase: SystemBase = new Map();

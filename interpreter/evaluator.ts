@@ -2,13 +2,13 @@ import {
   ExpressionNode,
   IdentifierExpressionNode,
   InfixExpressionNode,
-  IntegerLiteralNode,
+  NumberLiteralNode,
   PrefixExpressionNode,
 } from "./ast";
 
 enum ObjectType {
   ERROR = 0,
-  INTEGER = 1,
+  NUMBER = 1,
 }
 
 export abstract class ValueObject {
@@ -39,19 +39,24 @@ export class ErrorValue extends ValueObject {
   }
 }
 
-export class IntegerValue extends ValueObject {
+export class NumberValue extends ValueObject {
+  private _precision: number;
+
   private _value: number;
   public get value(): number {
     return this._value;
   }
 
-  constructor(value: number) {
-    super(ObjectType.INTEGER);
+  constructor(value: number, precision = 7) {
+    super(ObjectType.NUMBER);
     this._value = value;
+    this._precision = precision;
   }
 
   public equals(other: object): boolean {
-    return other instanceof IntegerValue ? this._value === other._value : false;
+    return other instanceof NumberValue
+      ? Math.abs(this._value - other._value) <= this._precision
+      : false;
   }
 }
 
@@ -66,7 +71,7 @@ export class Evaluator {
   public evaluate(node: ExpressionNode): ValueObject {
     switch (node.type) {
       case "Integer":
-        return new IntegerValue((node as IntegerLiteralNode).value);
+        return new NumberValue((node as NumberLiteralNode).value);
 
       case "Identifier": {
         if (!(node instanceof IdentifierExpressionNode)) {
@@ -121,8 +126,8 @@ export class Evaluator {
   private evalPrefixNode(operator: string, right: ValueObject): ValueObject {
     switch (operator) {
       case "-":
-        return right instanceof IntegerValue
-          ? new IntegerValue(-right.value)
+        return right instanceof NumberValue
+          ? new NumberValue(-right.value)
           : new ErrorValue(
               "object to the right of operator is not integer type",
             );
@@ -137,7 +142,7 @@ export class Evaluator {
     left: ValueObject,
     right: ValueObject,
   ): ValueObject {
-    if (!(left instanceof IntegerValue) || !(right instanceof IntegerValue)) {
+    if (!(left instanceof NumberValue) || !(right instanceof NumberValue)) {
       return new ErrorValue(
         `both objects must be numbers. Left type: ${ObjectType[left.type]}, right type: ${ObjectType[right.type]}`,
       );
@@ -148,18 +153,18 @@ export class Evaluator {
 
   private evalNumberInfixExpression(
     operator: string,
-    left: IntegerValue,
-    right: IntegerValue,
+    left: NumberValue,
+    right: NumberValue,
   ): ValueObject {
     switch (operator) {
       case "+":
-        return new IntegerValue(left.value + right.value);
+        return new NumberValue(left.value + right.value);
       case "-":
-        return new IntegerValue(left.value - right.value);
+        return new NumberValue(left.value - right.value);
       case "*":
-        return new IntegerValue(left.value * right.value);
+        return new NumberValue(left.value * right.value);
       case "/":
-        return new IntegerValue(left.value / right.value);
+        return new NumberValue(left.value / right.value);
 
       default:
         return new ErrorValue(`invalid infix operator provided ${operator}`);

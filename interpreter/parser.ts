@@ -2,8 +2,8 @@ import {
   ExpressionNode,
   IdentifierExpressionNode,
   InfixExpressionNode,
-  IntegerLiteralNode,
   InvalidExpressionNode,
+  NumberLiteralNode,
   PrefixExpressionNode,
 } from "./ast";
 import { Lexer, Token, TokenType } from "./lexer";
@@ -47,7 +47,7 @@ export class Parser {
       TokenType.MINUS,
       this.parsePrefixExpression.bind(this),
     );
-    this._prefixParsers.set(TokenType.INTEGER, this.parseInteger.bind(this));
+    this._prefixParsers.set(TokenType.NUMBER, this.parseNumber.bind(this));
     this._prefixParsers.set(
       TokenType.IDENTIFIER,
       this.parseIdentifier.bind(this),
@@ -110,10 +110,10 @@ export class Parser {
     return false;
   }
 
-  private parseInteger(): ExpressionNode {
-    return new IntegerLiteralNode(
+  private parseNumber(): ExpressionNode {
+    return new NumberLiteralNode(
       this._currentToken,
-      parseInt(this._currentToken.literal),
+      parseFloat(this._currentToken.literal),
     );
   }
 
