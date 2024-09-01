@@ -35,8 +35,9 @@ export class Lexer {
 
   private _parenthesisTracker: number[] = [];
 
-  /* NOTE: next char has to be one of operator, EOF or
-   * closing parenthesis to constitute a valid number */
+  /* NOTE: next char for number has to be one of operator, EOF, .
+   * or closing parenthesis to constitute a valid number
+   */
   private _validCharSetForNumber = new Set(["+", "-", "*", "/", ")", "", "."]);
 
   constructor(input: string) {
