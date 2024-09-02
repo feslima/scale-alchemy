@@ -7,6 +7,7 @@ export enum TokenType {
   MINUS = "-",
   ASTERISK = "*",
   SLASH = "/",
+  CARET = "^",
   LEFT_PARENTHESIS = "(",
   RIGHT_PARENTHESIS = ")",
 }
@@ -38,7 +39,16 @@ export class Lexer {
   /* NOTE: next char for number has to be one of operator, EOF, .
    * or closing parenthesis to constitute a valid number
    */
-  private _validCharSetForNumber = new Set(["+", "-", "*", "/", ")", "", "."]);
+  private _validCharSetForNumber = new Set([
+    "+",
+    "-",
+    "*",
+    "/",
+    "^",
+    ")",
+    "",
+    ".",
+  ]);
 
   constructor(input: string) {
     this._input = input;
@@ -68,6 +78,10 @@ export class Lexer {
 
       case "/":
         result = { type: TokenType.ASTERISK, literal: this._currentChar };
+        break;
+
+      case "^":
+        result = { type: TokenType.CARET, literal: this._currentChar };
         break;
 
       case "(":

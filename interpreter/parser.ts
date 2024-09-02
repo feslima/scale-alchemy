@@ -12,7 +12,8 @@ enum Precedence {
   LOWEST = 0,
   SUM = 1,
   PRODUCT = 2,
-  PREFIX = 3, // -X
+  EXPONENT = 3,
+  PREFIX = 4, // -X
 }
 
 const precedences = new Map<TokenType, Precedence>([
@@ -20,6 +21,7 @@ const precedences = new Map<TokenType, Precedence>([
   [TokenType.MINUS, Precedence.SUM],
   [TokenType.ASTERISK, Precedence.PRODUCT],
   [TokenType.SLASH, Precedence.PRODUCT],
+  [TokenType.CARET, Precedence.EXPONENT],
 ]);
 
 export class Parser {
@@ -71,6 +73,10 @@ export class Parser {
     );
     this._infixParsers.set(
       TokenType.SLASH,
+      this.parseInfixExpression.bind(this),
+    );
+    this._infixParsers.set(
+      TokenType.CARET,
       this.parseInfixExpression.bind(this),
     );
   }

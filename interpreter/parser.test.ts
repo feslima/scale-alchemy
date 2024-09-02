@@ -4,9 +4,14 @@ import { Parser } from "./parser";
 
 test.each([
   { input: "-a * b", expected: "((-a) * b)" },
+  { input: "a ^ b", expected: "(a ^ b)" },
+  { input: "a ^ -b", expected: "(a ^ (-b))" },
+  { input: "-a ^ b", expected: "((-a) ^ b)" },
   { input: "a + b + c", expected: "((a + b) + c)" },
   { input: "a + b - c", expected: "((a + b) - c)" },
   { input: "a * b * c", expected: "((a * b) * c)" },
+  { input: "a * b ^ c", expected: "(a * (b ^ c))" },
+  { input: "a / b ^ c", expected: "(a / (b ^ c))" },
   { input: "a * b / c", expected: "((a * b) / c)" },
   { input: "a + b / c", expected: "(a + (b / c))" },
   {

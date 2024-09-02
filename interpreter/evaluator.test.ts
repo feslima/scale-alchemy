@@ -25,6 +25,7 @@ test.each([
   },
   { input: "-5", expected: new NumberValue(-5) },
   { input: "-10", expected: new NumberValue(-10) },
+  { input: "10^3", expected: new NumberValue(1000) },
   { input: "5 + 5 + 5 + 5 - 10", expected: new NumberValue(10) },
   { input: "5 + 5.53 + 5.47 + 5 - 10", expected: new NumberValue(12) },
   { input: "2 * 2 * 2 * 2 * 2", expected: new NumberValue(32) },
@@ -36,6 +37,8 @@ test.each([
   { input: "2 * (5 + 10)", expected: new NumberValue(30) },
   { input: "3 * 3 * 3 + 10", expected: new NumberValue(37) },
   { input: "3 * (3 * 3) + 10", expected: new NumberValue(37) },
+  { input: "3 * (3 ^ 3) + 10", expected: new NumberValue(91) },
+  { input: "3 * 3 ^-3 + 10", expected: new NumberValue(13) },
   { input: "(5 + 10 * 2 + 15 / 3) * 2 + -10", expected: new NumberValue(50) },
   {
     input: "a + b + 5",
