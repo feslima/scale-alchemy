@@ -158,6 +158,61 @@ function getFactor<T extends Quantity[]>(unit: Unit<T>): number {
   return dividendFactor / divisorFactor;
 }
 
+/**
+ * Remember to call `.initialize()` after adding your quantities.
+ */
+export class QuantitySytem {
+  private _initialized: boolean = false;
+  private _dimensions: Set<Quantity> = new Set();
+
+  private _base: SystemBase = new Map();
+  public get base(): SystemBase {
+    if (!this._initialized) {
+      throw "Quantity system was not initialized.";
+    }
+    return this._base;
+  }
+
+  constructor() {
+    this._dimensions.add("Dimensionless");
+  }
+
+  private throwIfInitialized() {
+    if (this._initialized) {
+      throw "Can't perform this operation after system is initialized";
+    }
+  }
+
+  public add(quantity: Quantity) {
+    this.throwIfInitialized();
+    this._dimensions.add(quantity);
+  }
+
+  public initialize() {
+    this.throwIfInitialized();
+
+    const nDimensions = this._dimensions.size;
+    this._dimensions.delete("Dimensionless");
+    const dimensions: Quantity[] = ["Dimensionless" as Quantity].concat(
+      Array.from(this._dimensions),
+    );
+    for (let i = 0; i < nDimensions; i++) {
+      for (let j = 0; j < nDimensions; j++) {
+        if (i === j) {
+          const vector = Array(nDimensions).fill(0);
+          const dimension = dimensions[i];
+          if (dimension !== "Dimensionless") {
+            vector[i] = 1;
+          }
+          this._base.set(dimension, vector);
+        }
+      }
+    }
+
+    this._initialized = true;
+  }
+}
+
 export function extractUnits(
   unit: Unit<Quantity[]>,
 ): [SimpleUnit<Quantity>[], SimpleUnit<Quantity>[]] {
@@ -237,14 +292,11 @@ export function getDimensionFromCompositeUnit<
   QDivisor extends Quantity[],
 >(unit: CompositeUnit<QDividend, QDivisor>, base: SystemBase): Dimension {
   let result: Dimension = [];
-  let dividendDimension: Dimension = [];
-  let divisorDimension: Dimension = [];
+  let dividendDimension: Dimension = Array(base.size).fill(0);
+  let divisorDimension: Dimension = Array(base.size).fill(0);
 
   unit.dividend.forEach((u) => {
     const dim = base.get(u.quantity);
-    if (dividendDimension.length === 0 && dim !== undefined) {
-      dividendDimension = Array(dim.length).fill(0);
-    }
     dim?.forEach((d, index) => {
       if (d !== 0) {
         dividendDimension[index] += d;
@@ -254,9 +306,6 @@ export function getDimensionFromCompositeUnit<
 
   unit.divisor.forEach((u) => {
     const dim = base.get(u.quantity);
-    if (divisorDimension.length === 0 && dim !== undefined) {
-      divisorDimension = Array(dim.length).fill(0);
-    }
     dim?.forEach((d, index) => {
       if (d !== 0) {
         divisorDimension[index] += d;
@@ -264,7 +313,7 @@ export function getDimensionFromCompositeUnit<
     });
   });
 
-  result = Array(dividendDimension.length ?? divisorDimension.length).fill(0);
+  result = Array(base.size).fill(0);
   for (let i = 0; i < dividendDimension.length; i++) {
     result[i] += dividendDimension[i];
     result[i] -= divisorDimension[i];
@@ -318,17 +367,6 @@ export function analyze<S extends Quantity[], D extends Quantity[]>(
     sum[i] = sDim[i] - dDim[i];
   }
   return sum.every((e) => e === 0);
-}
-
-export class Converter {
-  private _systemBase: SystemBase = new Map();
-
-  constructor() {
-    this._systemBase.set("Length", [1, 0, 0, 0]);
-    this._systemBase.set("Mass", [0, 1, 0, 0]);
-    this._systemBase.set("Time", [0, 0, 1, 0]);
-    this._systemBase.set("Energy", [0, 0, 0, 1]);
-  }
 }
 
 export function convert<S extends Quantity, D extends Quantity>(

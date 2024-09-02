@@ -152,7 +152,8 @@ export class EvaluatorWithUnits {
     unitSystemBase: SystemBase,
     environment: EvaluationWithUnitEnvironmentType,
   ) {
-    (this._systemBase = unitSystemBase), (this._environment = environment);
+    this._systemBase = unitSystemBase;
+    this._environment = environment;
   }
 
   public evaluate(node: ExpressionNode): ValueObject {

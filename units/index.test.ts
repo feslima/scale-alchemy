@@ -10,19 +10,20 @@ import {
   MegaWattHour,
   Meter,
   MeterPerSecond,
+  QuantitySytem,
   Stere,
   Terajoule,
   Ton,
 } from ".";
 
-const testSystemBase: SystemBase = new Map();
-testSystemBase.set("Dimensionless", [0, 0, 0, 0, 0, 0]);
-testSystemBase.set("Length", [1, 0, 0, 0, 0, 0]);
-testSystemBase.set("Mass", [0, 1, 0, 0, 0, 0]);
-testSystemBase.set("Time", [0, 0, 1, 0, 0, 0]);
-testSystemBase.set("Energy", [0, 0, 0, 1, 0, 0]);
-testSystemBase.set("Volume", [0, 0, 0, 0, 1, 0, 0]);
-testSystemBase.set("Density", [0, 0, 0, 0, 0, 1]);
+const unitSystem = new QuantitySytem();
+unitSystem.add("Length");
+unitSystem.add("Mass");
+unitSystem.add("Time");
+unitSystem.add("Energy");
+unitSystem.add("Volume");
+unitSystem.add("Density");
+unitSystem.initialize();
 
 test.each([
   { source: Adimensional, destination: Adimensional, expected: 1 },
@@ -36,7 +37,7 @@ test.each([
 ])(
   "simple conversion: $source.name to $destination.name -> %f",
   ({ source, destination, expected }) => {
-    const result = convert(source, destination, testSystemBase);
+    const result = convert(source, destination, unitSystem.base);
     if (isNaN(expected)) {
       expect(result).to.be.NaN;
     } else {
@@ -63,7 +64,7 @@ test.each([
 ])(
   "composite conversion: $source.name to $destination.name -> %i",
   ({ source, destination, expected }) => {
-    const result = convert(source, destination, testSystemBase);
+    const result = convert(source, destination, unitSystem.base);
     if (isNaN(expected)) {
       expect(result).to.be.NaN;
     } else {

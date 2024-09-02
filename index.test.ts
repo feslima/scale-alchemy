@@ -7,6 +7,7 @@ import {
   EvaluatorWithUnits,
   NumberWithUnitValue,
 } from "./interpreter/unit-evaluator";
+import { QuantitySytem } from "./units";
 
 interface EmissionFactorCalculationTestCase {
   input: string;
@@ -14,12 +15,13 @@ interface EmissionFactorCalculationTestCase {
   expected: NumberWithUnitValue;
 }
 
-const testSystemBase: SystemBase = new Map();
-testSystemBase.set("Dimensionless", [0, 0, 0, 0]);
-testSystemBase.set("Mass", [1, 0, 0, 0]);
-testSystemBase.set("Energy", [0, 1, 0, 0]);
-testSystemBase.set("Volume", [0, 0, 1, 0]);
-testSystemBase.set("Length", [0, 0, 0, 1]);
+const unitSystem = new QuantitySytem();
+unitSystem.add("Length");
+unitSystem.add("Mass");
+unitSystem.add("Energy");
+unitSystem.add("Volume");
+unitSystem.add("Density");
+unitSystem.initialize();
 
 const Adimensional: SimpleUnit<Dimensionless> = {
   name: "adimensional",
@@ -186,24 +188,24 @@ test.each([
   {
     input: "a + b",
     environment: new Map([
-      ["a", new NumberWithUnitValue(5, Meter, testSystemBase)],
-      ["b", new NumberWithUnitValue(5, Meter, testSystemBase)],
+      ["a", new NumberWithUnitValue(5, Meter, unitSystem.base)],
+      ["b", new NumberWithUnitValue(5, Meter, unitSystem.base)],
     ]),
-    expected: new NumberWithUnitValue(10, Meter, testSystemBase),
+    expected: new NumberWithUnitValue(10, Meter, unitSystem.base),
   },
   {
     input: "a ^ b",
     environment: new Map([
-      ["a", new NumberWithUnitValue(5, Meter, testSystemBase)],
-      ["b", new NumberWithUnitValue(2, Adimensional, testSystemBase)],
+      ["a", new NumberWithUnitValue(5, Meter, unitSystem.base)],
+      ["b", new NumberWithUnitValue(2, Adimensional, unitSystem.base)],
     ]),
-    expected: new NumberWithUnitValue(25, Meter, testSystemBase),
+    expected: new NumberWithUnitValue(25, Meter, unitSystem.base),
   },
   {
     input: "c ^ d",
     environment: new Map([
-      ["c", new NumberWithUnitValue(5, Meter, testSystemBase)],
-      ["d", new NumberWithUnitValue(2, Meter, testSystemBase)],
+      ["c", new NumberWithUnitValue(5, Meter, unitSystem.base)],
+      ["d", new NumberWithUnitValue(2, Meter, unitSystem.base)],
     ]),
     expected: new ErrorValue(
       "exponentiation only allowed if exponent is dimensionless",
@@ -212,16 +214,16 @@ test.each([
   {
     input: "e ^ f",
     environment: new Map([
-      ["e", new NumberWithUnitValue(5, Adimensional, testSystemBase)],
-      ["f", new NumberWithUnitValue(2, Adimensional, testSystemBase)],
+      ["e", new NumberWithUnitValue(5, Adimensional, unitSystem.base)],
+      ["f", new NumberWithUnitValue(2, Adimensional, unitSystem.base)],
     ]),
-    expected: new NumberWithUnitValue(25, Adimensional, testSystemBase),
+    expected: new NumberWithUnitValue(25, Adimensional, unitSystem.base),
   },
   {
     input: "g ^ h",
     environment: new Map([
-      ["g", new NumberWithUnitValue(5, Adimensional, testSystemBase)],
-      ["h", new NumberWithUnitValue(2, Meter, testSystemBase)],
+      ["g", new NumberWithUnitValue(5, Adimensional, unitSystem.base)],
+      ["h", new NumberWithUnitValue(2, Meter, unitSystem.base)],
     ]),
     expected: new ErrorValue(
       "exponentiation only allowed if exponent is dimensionless",
@@ -232,7 +234,7 @@ test.each([
   ({ input, environment, expected }) => {
     const expressionTree = new Parser(new Lexer(input)).parse();
     const evaluator = new EvaluatorWithUnits(
-      testSystemBase,
+      unitSystem.base,
       environment !== undefined ? environment : new Map(),
     );
 
@@ -253,17 +255,17 @@ test.each([
     environment: new Map([
       [
         "Density",
-        new NumberWithUnitValue(390, KilogramPerStere, testSystemBase),
+        new NumberWithUnitValue(390, KilogramPerStere, unitSystem.base),
       ],
       [
         "NCV",
-        new NumberWithUnitValue(15.6, TerajoulePerGigaGram, testSystemBase),
+        new NumberWithUnitValue(15.6, TerajoulePerGigaGram, unitSystem.base),
       ],
     ]),
     expected: new NumberWithUnitValue(
       1.69,
       MegawatthourPerStere,
-      testSystemBase,
+      unitSystem.base,
     ),
   },
   {
@@ -271,36 +273,40 @@ test.each([
     environment: new Map([
       [
         "Density",
-        new NumberWithUnitValue(390, KilogramPerStere, testSystemBase),
+        new NumberWithUnitValue(390, KilogramPerStere, unitSystem.base),
       ],
       [
         "NCV",
-        new NumberWithUnitValue(15.6, TerajoulePerGigaGram, testSystemBase),
+        new NumberWithUnitValue(15.6, TerajoulePerGigaGram, unitSystem.base),
       ],
       [
         "EFCH4",
-        new NumberWithUnitValue(300, KilogramPerTerajoule, testSystemBase),
+        new NumberWithUnitValue(300, KilogramPerTerajoule, unitSystem.base),
       ],
     ]),
-    expected: new NumberWithUnitValue(1.8252e-3, TonPerStere, testSystemBase),
+    expected: new NumberWithUnitValue(1.8252e-3, TonPerStere, unitSystem.base),
   },
   {
     input: "((1 - FracBio) * EFCO2Diesel)/FuelEfficiency",
     environment: new Map([
       [
         "FuelEfficiency",
-        new NumberWithUnitValue(2.578168115, KilometerPerLiter, testSystemBase),
+        new NumberWithUnitValue(
+          2.578168115,
+          KilometerPerLiter,
+          unitSystem.base,
+        ),
       ],
       [
         "EFCO2Diesel",
-        new NumberWithUnitValue(2.603, TonPerCubicMeter, testSystemBase),
+        new NumberWithUnitValue(2.603, TonPerCubicMeter, unitSystem.base),
       ],
-      ["FracBio", new NumberWithUnitValue(0.12, Adimensional, testSystemBase)],
+      ["FracBio", new NumberWithUnitValue(0.12, Adimensional, unitSystem.base)],
     ]),
     expected: new NumberWithUnitValue(
       888.4758083357,
       TonPerGigameter,
-      testSystemBase,
+      unitSystem.base,
     ),
   },
   {
@@ -309,30 +315,38 @@ test.each([
     environment: new Map([
       [
         "FuelEfficiency",
-        new NumberWithUnitValue(2.578168115, KilometerPerLiter, testSystemBase),
+        new NumberWithUnitValue(
+          2.578168115,
+          KilometerPerLiter,
+          unitSystem.base,
+        ),
       ],
       [
         "EFCH4Diesel",
-        new NumberWithUnitValue(3.9, KilogramPerTerajoule, testSystemBase),
+        new NumberWithUnitValue(3.9, KilogramPerTerajoule, unitSystem.base),
       ],
       [
         "NCVDiesel",
-        new NumberWithUnitValue(10100, KilocaloriePerKilogram, testSystemBase),
+        new NumberWithUnitValue(10100, KilocaloriePerKilogram, unitSystem.base),
       ],
       [
         "DensityDiesel",
-        new NumberWithUnitValue(840, KilogramPerCubicMeter, testSystemBase),
+        new NumberWithUnitValue(840, KilogramPerCubicMeter, unitSystem.base),
       ],
-      ["FracBio", new NumberWithUnitValue(0.12, Adimensional, testSystemBase)],
+      ["FracBio", new NumberWithUnitValue(0.12, Adimensional, unitSystem.base)],
       [
         "EFCH4biodiesel",
-        new NumberWithUnitValue(0.0003315946, TonPerCubicMeter, testSystemBase),
+        new NumberWithUnitValue(
+          0.0003315946,
+          TonPerCubicMeter,
+          unitSystem.base,
+        ),
       ],
     ]),
     expected: new NumberWithUnitValue(
       0.0627184764,
       TonPerGigameter,
-      testSystemBase,
+      unitSystem.base,
     ),
   },
 ] as EmissionFactorCalculationTestCase[])(
@@ -340,7 +354,7 @@ test.each([
   ({ input, environment, expected }) => {
     const expressionTree = new Parser(new Lexer(input)).parse();
     const evaluator = new EvaluatorWithUnits(
-      testSystemBase,
+      unitSystem.base,
       environment !== undefined ? environment : new Map(),
     );
 
