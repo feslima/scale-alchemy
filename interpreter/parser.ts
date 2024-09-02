@@ -157,8 +157,22 @@ export class Parser {
   private parseNumber(): ExpressionNode {
     return new NumberLiteralNode(
       this._currentToken,
-      parseFloat(this._currentToken.literal),
+      this.parseNumberMaybeExponent(this._currentToken.literal),
     );
+  }
+
+  private parseNumberMaybeExponent(raw: string): number {
+    if (raw.indexOf("^") > -1) {
+      const split = raw.split("^");
+      if (split.length !== 2) {
+        return NaN;
+      }
+
+      const base = parseFloat(split[0]);
+      const exponent = parseFloat(split[1]);
+      return Number(Math.pow(base, exponent));
+    }
+    return parseFloat(raw);
   }
 
   private parseIdentifier(): ExpressionNode {

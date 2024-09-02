@@ -175,10 +175,19 @@ export class Lexer {
    */
   private readNumber(): string {
     const position = this._position;
-    while (this.isDigit(this._currentChar) || this._currentChar === ".") {
+    while (
+      this.isDigit(this._currentChar) ||
+      this.isDecimalSeparator(this._currentChar) ||
+      this.isExponent(this._currentChar)
+    ) {
       this.readChar();
-      const nextChar = this.peekChar();
 
+      if (this.isExponent(this._currentChar)) {
+        this.readChar(); // skip the exponent symbol
+        this.readNumberExponent();
+      }
+
+      const nextChar = this.peekChar();
       if (this.isDigit(nextChar) || this.isWhiteSpace(nextChar)) {
         continue;
       }
@@ -191,8 +200,30 @@ export class Lexer {
     return this._input.slice(position, this._position);
   }
 
+  private readNumberExponent() {
+    if (this.isValidExponentPrefix(this._currentChar)) {
+      this.readChar(); // means that the exponent begins with either + or -
+    }
+
+    while (this.isDigit(this._currentChar)) {
+      this.readChar();
+    }
+  }
+
   private isNextCharValidForNumber(char: string): boolean {
     return this._validCharSetForNumber.has(char);
+  }
+
+  private isDecimalSeparator(char: string): boolean {
+    return char === ".";
+  }
+
+  private isExponent(char: string): boolean {
+    return char === "^";
+  }
+
+  private isValidExponentPrefix(char: string): boolean {
+    return char === "-" || char === "+";
   }
 
   private isLetter(char: string): boolean {

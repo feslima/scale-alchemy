@@ -21,9 +21,14 @@ test.each([
   {
     input: "10^3",
     expectedSequence: [
-      { type: TokenType.NUMBER, literal: "10" },
-      { type: TokenType.CARET, literal: "^" },
-      { type: TokenType.NUMBER, literal: "3" },
+      { type: TokenType.NUMBER, literal: "10^3" },
+      { type: TokenType.EOF, literal: "" },
+    ],
+  },
+  {
+    input: "10^-3",
+    expectedSequence: [
+      { type: TokenType.NUMBER, literal: "10^-3" },
       { type: TokenType.EOF, literal: "" },
     ],
   },
