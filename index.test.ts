@@ -7,17 +7,6 @@ import {
   EvaluatorWithUnits,
   NumberWithUnitValue,
 } from "./interpreter/unit-evaluator";
-import {
-  Adimensional,
-  Gigagram,
-  Kilogram,
-  Kilometer,
-  MegaWattHour,
-  Meter,
-  Stere,
-  Terajoule,
-  Ton,
-} from "./units";
 
 interface EmissionFactorCalculationTestCase {
   input: string;
@@ -31,6 +20,69 @@ testSystemBase.set("Mass", [1, 0, 0, 0]);
 testSystemBase.set("Energy", [0, 1, 0, 0]);
 testSystemBase.set("Volume", [0, 0, 1, 0]);
 testSystemBase.set("Length", [0, 0, 0, 1]);
+
+const Adimensional: SimpleUnit<Dimensionless> = {
+  name: "adimensional",
+  quantity: "Dimensionless",
+  factor: 1.0,
+  synonyms: [],
+};
+
+const Meter: SimpleUnit<Length> = {
+  name: "meter",
+  quantity: "Length",
+  factor: 1.0,
+  synonyms: ["m", "meters"],
+};
+
+const Kilometer: SimpleUnit<Length> = {
+  name: "kilometer",
+  quantity: "Length",
+  factor: 1e3,
+  synonyms: ["km", "kilometers"],
+};
+
+const Kilogram: SimpleUnit<Mass> = {
+  name: "kilogram",
+  quantity: "Mass",
+  factor: 1.0e3,
+  synonyms: ["kg", "kilograms"],
+};
+
+const Ton: SimpleUnit<Mass> = {
+  name: "ton",
+  quantity: "Mass",
+  factor: 1.0e6,
+  synonyms: ["ton", "mg", "tonnes", "megagrams"],
+};
+
+const Gigagram: SimpleUnit<Mass> = {
+  name: "gigagram",
+  quantity: "Mass",
+  factor: 1.0e9,
+  synonyms: ["Gg", "gigagrams"],
+};
+
+const MegaWattHour: SimpleUnit<Energy> = {
+  name: "megawatt-hour",
+  quantity: "Energy",
+  factor: 3.6e9,
+  synonyms: ["MHh", "megawatt-hours"],
+};
+
+const Terajoule: SimpleUnit<Energy> = {
+  name: "terajoule",
+  quantity: "Energy",
+  factor: 1.0e12,
+  synonyms: ["TJ", "terajoules"],
+};
+
+const Stere: SimpleUnit<Volume> = {
+  name: "stere",
+  synonyms: ["st", "steres"],
+  quantity: "Volume",
+  factor: 1.0,
+};
 
 const Gigameter: SimpleUnit<Length> = {
   name: "gigameter",
@@ -53,11 +105,25 @@ const Liter: SimpleUnit<Volume> = {
   factor: 1e-3,
 };
 
+const Kilocalorie: SimpleUnit<Energy> = {
+  name: "kilocalorie",
+  synonyms: ["kcal", "kilocalories"],
+  quantity: "Energy",
+  factor: 4186.8,
+};
+
 const KilometerPerLiter: CompositeUnit<[Length], [Volume]> = {
   name: "kilometer per liter",
   synonyms: ["km/L", "kilometers per liter"],
   dividend: [Kilometer],
   divisor: [Liter],
+};
+
+const KilogramPerCubicMeter: CompositeUnit<[Mass], [Volume]> = {
+  name: "kilogram per cubic meter",
+  synonyms: ["kg/m^3", "kg*m^-3"],
+  dividend: [Kilogram],
+  divisor: [CubicMeter],
 };
 
 const KilogramPerStere: CompositeUnit<[Mass], [Volume]> = {
@@ -107,6 +173,13 @@ const MegawatthourPerStere: CompositeUnit<[Energy], [Volume]> = {
   synonyms: ["MHh * st^-1"],
   dividend: [MegaWattHour],
   divisor: [Stere],
+};
+
+const KilocaloriePerKilogram: CompositeUnit<[Energy], [Mass]> = {
+  name: "kcal per kg",
+  synonyms: ["kcal/kg"],
+  dividend: [Kilocalorie],
+  divisor: [Kilogram],
 };
 
 test.each([
@@ -226,6 +299,38 @@ test.each([
     ]),
     expected: new NumberWithUnitValue(
       888.4758083357,
+      TonPerGigameter,
+      testSystemBase,
+    ),
+  },
+  {
+    input:
+      "(FracBio * EFCH4biodiesel)/FuelEfficiency + (((1 - FracBio) * DensityDiesel * NCVDiesel * EFCH4Diesel)/FuelEfficiency)",
+    environment: new Map([
+      [
+        "FuelEfficiency",
+        new NumberWithUnitValue(2.578168115, KilometerPerLiter, testSystemBase),
+      ],
+      [
+        "EFCH4Diesel",
+        new NumberWithUnitValue(3.9, KilogramPerTerajoule, testSystemBase),
+      ],
+      [
+        "NCVDiesel",
+        new NumberWithUnitValue(10100, KilocaloriePerKilogram, testSystemBase),
+      ],
+      [
+        "DensityDiesel",
+        new NumberWithUnitValue(840, KilogramPerCubicMeter, testSystemBase),
+      ],
+      ["FracBio", new NumberWithUnitValue(0.12, Adimensional, testSystemBase)],
+      [
+        "EFCH4biodiesel",
+        new NumberWithUnitValue(0.0003315946, TonPerCubicMeter, testSystemBase),
+      ],
+    ]),
+    expected: new NumberWithUnitValue(
+      0.0627184764,
       TonPerGigameter,
       testSystemBase,
     ),
