@@ -15,6 +15,12 @@ interface EmissionFactorCalculationTestCase {
   expected: NumberWithUnitValue;
 }
 
+type Dimensionless = "Dimensionless";
+type Length = "Length";
+type Mass = "Mass";
+type Energy = "Energy";
+type Volume = "Volume";
+
 const unitSystem = new QuantitySytem();
 unitSystem.add("Length");
 unitSystem.add("Mass");

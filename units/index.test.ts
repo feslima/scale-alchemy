@@ -16,6 +16,10 @@ import {
   Ton,
 } from ".";
 
+type Mass = "Mass";
+type Energy = "Energy";
+type Volume = "Volume";
+
 const unitSystem = new QuantitySytem();
 unitSystem.add("Length");
 unitSystem.add("Mass");

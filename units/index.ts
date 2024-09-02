@@ -1,3 +1,11 @@
+type Dimensionless = "Dimensionless";
+type Length = "Length";
+type Mass = "Mass";
+type Time = "Time";
+type Energy = "Energy";
+type Volume = "Volume";
+type Density = "Density";
+
 export const Adimensional: SimpleUnit<Dimensionless> = {
   name: "adimensional",
   quantity: "Dimensionless",
