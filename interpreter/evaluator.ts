@@ -110,27 +110,35 @@ export class Evaluator {
         return this.evalIdentifierNode(node);
       }
       case "Prefix": {
-        const n = node as PrefixExpressionNode;
-        const right = this.evaluate(n.right);
+        if (!(node instanceof PrefixExpressionNode)) {
+          return new ErrorValue(
+            "node type does not match with prefix expression node",
+          );
+        }
+        const right = this.evaluate(node.right);
         if (right instanceof ErrorValue) {
           return right;
         }
-        return this.evalPrefixNode(n.operator, right);
+        return this.evalPrefixNode(node.operator, right);
       }
       case "Infix": {
-        const n = node as InfixExpressionNode;
+        if (!(node instanceof InfixExpressionNode)) {
+          return new ErrorValue(
+            "node type does not match with prefix expression node",
+          );
+        }
 
-        const left = this.evaluate(n.left);
+        const left = this.evaluate(node.left);
         if (left instanceof ErrorValue) {
           return left;
         }
 
-        const right = this.evaluate(n.right);
+        const right = this.evaluate(node.right);
         if (right instanceof ErrorValue) {
           return right;
         }
 
-        return this.evalInfixNode(n.operator, left, right);
+        return this.evalInfixNode(node.operator, left, right);
       }
       case "Invalid": {
         return new ErrorValue("invalid syntax for evaluation");
