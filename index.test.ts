@@ -1,13 +1,14 @@
 import { expect, test } from "vitest";
-import {
-  ErrorValue,
-  EvaluationEnvironmentType,
-  Evaluator,
-  NumberWithUnitValue,
-} from "./interpreter/evaluator";
 import { Lexer } from "./interpreter/lexer";
 import { Parser } from "./interpreter/parser";
 import {
+  ErrorValue,
+  EvaluationWithUnitEnvironmentType,
+  EvaluatorWithUnits,
+  NumberWithUnitValue,
+} from "./interpreter/unit-evaluator";
+import {
+  Adimensional,
   Gigagram,
   Kilogram,
   MegaWattHour,
@@ -19,7 +20,7 @@ import {
 
 interface EmissionFactorCalculationTestCase {
   input: string;
-  environment?: EvaluationEnvironmentType;
+  environment?: EvaluationWithUnitEnvironmentType;
   expected: NumberWithUnitValue;
 }
 
@@ -75,6 +76,42 @@ test.each([
     expected: new NumberWithUnitValue(10, Meter, testSystemBase),
   },
   {
+    input: "a ^ b",
+    environment: new Map([
+      ["a", new NumberWithUnitValue(5, Meter, testSystemBase)],
+      ["b", new NumberWithUnitValue(2, Adimensional, testSystemBase)],
+    ]),
+    expected: new NumberWithUnitValue(25, Meter, testSystemBase),
+  },
+  {
+    input: "c ^ d",
+    environment: new Map([
+      ["c", new NumberWithUnitValue(5, Meter, testSystemBase)],
+      ["d", new NumberWithUnitValue(2, Meter, testSystemBase)],
+    ]),
+    expected: new ErrorValue(
+      "exponentiation only allowed if exponent is dimensionless",
+    ),
+  },
+  {
+    input: "e ^ f",
+    environment: new Map([
+      ["e", new NumberWithUnitValue(5, Adimensional, testSystemBase)],
+      ["f", new NumberWithUnitValue(2, Adimensional, testSystemBase)],
+    ]),
+    expected: new NumberWithUnitValue(25, Adimensional, testSystemBase),
+  },
+  {
+    input: "g ^ h",
+    environment: new Map([
+      ["g", new NumberWithUnitValue(5, Adimensional, testSystemBase)],
+      ["h", new NumberWithUnitValue(2, Meter, testSystemBase)],
+    ]),
+    expected: new ErrorValue(
+      "exponentiation only allowed if exponent is dimensionless",
+    ),
+  },
+  {
     input: "NCV * Density",
     environment: new Map([
       [
@@ -114,7 +151,8 @@ test.each([
   "evaluation with units of: $input",
   ({ input, environment, expected }) => {
     const expressionTree = new Parser(new Lexer(input)).parse();
-    const evaluator = new Evaluator(
+    const evaluator = new EvaluatorWithUnits(
+      testSystemBase,
       environment !== undefined ? environment : new Map(),
     );
 
