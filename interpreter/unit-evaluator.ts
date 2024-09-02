@@ -1,8 +1,9 @@
 import {
   Adimensional,
-  combineUnits,
   convert,
+  divideUnits,
   isUnitDimensionless,
+  multiplyUnits,
 } from "../units";
 import {
   ExpressionNode,
@@ -118,12 +119,12 @@ export class NumberWithUnitValue extends ValueObject {
       }
       case "*": {
         const result = left.value * right.value;
-        const unit = combineUnits(left.unit, right.unit);
+        const unit = multiplyUnits(left.unit, right.unit);
         return new NumberWithUnitValue(result, unit, right._base);
       }
       case "/": {
         const result = left.value / right.value;
-        const unit = combineUnits(left.unit, right.unit);
+        const unit = divideUnits(left.unit, right.unit);
         return new NumberWithUnitValue(result, unit, right._base);
       }
       default: {

@@ -174,7 +174,7 @@ export function extractUnits(
   return [dividend, divisor];
 }
 
-export function combineUnits(
+export function multiplyUnits(
   first: Unit<Quantity[]>,
   second: Unit<Quantity[]>,
 ): CompositeUnit<Quantity[], Quantity[]> {
@@ -189,6 +189,30 @@ export function combineUnits(
 
   divisorFirst.forEach((unit) => divisor.push(unit));
   divisorSecond.forEach((unit) => divisor.push(unit));
+
+  return {
+    name: "generated",
+    synonyms: ["to be done"],
+    dividend,
+    divisor,
+  };
+}
+
+export function divideUnits(
+  first: Unit<Quantity[]>,
+  second: Unit<Quantity[]>,
+): CompositeUnit<Quantity[], Quantity[]> {
+  const [dividendFirst, divisorFirst] = extractUnits(first);
+  const [dividendSecond, divisorSecond] = extractUnits(second);
+
+  const dividend: SimpleUnit<Quantity>[] = [];
+  const divisor: SimpleUnit<Quantity>[] = [];
+
+  dividendFirst.forEach((unit) => dividend.push(unit));
+  divisorSecond.forEach((unit) => dividend.push(unit));
+
+  divisorFirst.forEach((unit) => divisor.push(unit));
+  dividendSecond.forEach((unit) => divisor.push(unit));
 
   return {
     name: "generated",
