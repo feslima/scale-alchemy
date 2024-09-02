@@ -1,3 +1,10 @@
+export const Adimensional: SimpleUnit<Dimensionless> = {
+  name: "adimensional",
+  quantity: "Dimensionless",
+  factor: 1.0,
+  synonyms: [],
+};
+
 export const Meter: SimpleUnit<Length> = {
   name: "meter",
   quantity: "Length",
@@ -189,6 +196,16 @@ export function combineUnits(
     dividend,
     divisor,
   };
+}
+
+export function isUnitDimensionless(
+  unit: Unit<Quantity[]>,
+  systemBase: SystemBase,
+): boolean {
+  if (isSimpleUnit(unit)) {
+    return unit.quantity === "Dimensionless";
+  }
+  return getDimensionFromCompositeUnit(unit, systemBase).every((d) => d === 0);
 }
 
 export function getDimensionFromCompositeUnit<

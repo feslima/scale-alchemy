@@ -1,5 +1,6 @@
 import { expect, test } from "vitest";
 import {
+  Adimensional,
   Centimeter,
   convert,
   Foot,
@@ -24,9 +25,14 @@ testSystemBase.set("Volume", [0, 0, 0, 0, 1, 0, 0]);
 testSystemBase.set("Density", [0, 0, 0, 0, 0, 1]);
 
 test.each([
+  { source: Adimensional, destination: Adimensional, expected: 1 },
+  { source: Adimensional, destination: Meter, expected: NaN },
+  { source: Meter, destination: Adimensional, expected: NaN },
   { source: Foot, destination: Centimeter, expected: 30.48 },
   { source: Meter, destination: Foot, expected: 3.280839 },
   { source: Meter, destination: Meter, expected: 1 },
+  { source: Kilogram, destination: Meter, expected: NaN },
+  { source: Terajoule, destination: MegaWattHour, expected: 1e6 / 3600 },
 ])(
   "simple conversion: $source.name to $destination.name -> %f",
   ({ source, destination, expected }) => {
@@ -42,8 +48,18 @@ test.each([
 test.each([
   { source: MeterPerSecond, destination: KiloMeterPerHour, expected: 3.6 },
   { source: KiloMeterPerHour, destination: MeterPerSecond, expected: 1 / 3.6 },
-  { source: Kilogram, destination: Meter, expected: NaN },
-  { source: Terajoule, destination: MegaWattHour, expected: 1e6 / 3600 },
+  { source: MeterPerSecond, destination: Adimensional, expected: NaN },
+  { source: Adimensional, destination: KiloMeterPerHour, expected: NaN },
+  {
+    source: {
+      name: "composite adimensional",
+      synonyms: [],
+      dividend: [Meter],
+      divisor: [Meter],
+    },
+    destination: Adimensional,
+    expected: 1,
+  },
 ])(
   "composite conversion: $source.name to $destination.name -> %i",
   ({ source, destination, expected }) => {
