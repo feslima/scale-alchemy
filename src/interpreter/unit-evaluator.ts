@@ -12,6 +12,7 @@ import {
   NumberLiteralNode,
   PrefixExpressionNode,
 } from "./ast";
+import { TokenType } from "./lexer";
 
 enum ObjectWithUnitType {
   ERROR = 0,
@@ -49,7 +50,13 @@ export class ErrorValue extends ValueObject {
 export class NumberWithUnitValue extends ValueObject {
   private _precision: number;
   private _system: QuantitySytem;
-  private static _supportedOperators = new Set(["+", "-", "*", "/", "^"]);
+  private static _supportedOperators = new Set<string>([
+    TokenType.PLUS,
+    TokenType.MINUS,
+    TokenType.ASTERISK,
+    TokenType.SLASH,
+    TokenType.CARET,
+  ]);
 
   private _unit: Unit<Quantity[]>;
   public get unit(): Unit<Quantity[]> {
@@ -97,7 +104,7 @@ export class NumberWithUnitValue extends ValueObject {
     }
 
     switch (operator) {
-      case "+": {
+      case TokenType.PLUS: {
         const factor = convert(left.unit, right.unit, left._system.base);
         if (isNaN(factor)) {
           return new ErrorValue(
@@ -107,7 +114,7 @@ export class NumberWithUnitValue extends ValueObject {
         const result = left.value * factor + right.value;
         return new NumberWithUnitValue(result, right.unit, right._system);
       }
-      case "-": {
+      case TokenType.MINUS: {
         const factor = convert(left.unit, right.unit, left._system.base);
         if (isNaN(factor)) {
           return new ErrorValue(
@@ -117,12 +124,12 @@ export class NumberWithUnitValue extends ValueObject {
         const result = left.value * factor - right.value;
         return new NumberWithUnitValue(result, right.unit, right._system);
       }
-      case "*": {
+      case TokenType.ASTERISK: {
         const result = left.value * right.value;
         const unit = multiplyUnits(left.unit, right.unit);
         return new NumberWithUnitValue(result, unit, right._system);
       }
-      case "/": {
+      case TokenType.SLASH: {
         const result = left.value / right.value;
         const unit = divideUnits(left.unit, right.unit);
         return new NumberWithUnitValue(result, unit, right._system);

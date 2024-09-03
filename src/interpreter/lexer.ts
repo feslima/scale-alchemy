@@ -10,6 +10,8 @@ export enum TokenType {
   CARET = "^",
   LEFT_PARENTHESIS = "(",
   RIGHT_PARENTHESIS = ")",
+  DOT = ".",
+  NOTHING = "",
 }
 
 class LexerError extends Error {
@@ -39,15 +41,15 @@ export class Lexer {
   /* NOTE: next char for number has to be one of operator, EOF, .
    * or closing parenthesis to constitute a valid number
    */
-  private _validCharSetForNumber = new Set([
-    "+",
-    "-",
-    "*",
-    "/",
-    "^",
-    ")",
-    "",
-    ".",
+  private _validCharSetForNumber = new Set<string>([
+    TokenType.PLUS,
+    TokenType.MINUS,
+    TokenType.ASTERISK,
+    TokenType.SLASH,
+    TokenType.CARET,
+    TokenType.RIGHT_PARENTHESIS,
+    TokenType.NOTHING,
+    TokenType.DOT,
   ]);
 
   constructor(input: string) {
@@ -215,15 +217,15 @@ export class Lexer {
   }
 
   private isDecimalSeparator(char: string): boolean {
-    return char === ".";
+    return char === TokenType.DOT;
   }
 
   private isExponent(char: string): boolean {
-    return char === "^";
+    return char === TokenType.CARET;
   }
 
   private isValidExponentPrefix(char: string): boolean {
-    return char === "-" || char === "+";
+    return char === TokenType.PLUS || char === TokenType.MINUS;
   }
 
   private isLetter(char: string): boolean {

@@ -5,6 +5,7 @@ import {
   NumberLiteralNode,
   PrefixExpressionNode,
 } from "./ast";
+import { TokenType } from "./lexer";
 
 enum ObjectType {
   ERROR = 0,
@@ -65,15 +66,15 @@ export class NumberValue extends ValueObject {
     right: NumberValue,
   ): ValueObject {
     switch (operator) {
-      case "+":
+      case TokenType.PLUS:
         return new NumberValue(left.value + right.value);
-      case "-":
+      case TokenType.MINUS:
         return new NumberValue(left.value - right.value);
-      case "*":
+      case TokenType.ASTERISK:
         return new NumberValue(left.value * right.value);
-      case "/":
+      case TokenType.SLASH:
         return new NumberValue(left.value / right.value);
-      case "^":
+      case TokenType.CARET:
         return new NumberValue(Math.pow(left.value, right.value));
 
       default:

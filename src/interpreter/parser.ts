@@ -162,8 +162,8 @@ export class Parser {
   }
 
   private parseNumberMaybeExponent(raw: string): number {
-    if (raw.indexOf("^") > -1) {
-      const split = raw.split("^");
+    if (raw.indexOf(TokenType.CARET) > -1) {
+      const split = raw.split(TokenType.CARET);
       if (split.length !== 2) {
         return NaN;
       }

@@ -36,6 +36,8 @@ unitSystem.add("Volume");
 unitSystem.add("Density");
 unitSystem.initialize();
 
+const Adimensional = unitSystem.adimensional;
+
 test.each([
   {
     input: "a + b",
@@ -49,7 +51,7 @@ test.each([
     input: "a ^ b",
     environment: new Map([
       ["a", new NumberWithUnitValue(5, Meter, unitSystem)],
-      ["b", new NumberWithUnitValue(2, unitSystem.adimensional, unitSystem)],
+      ["b", new NumberWithUnitValue(2, Adimensional, unitSystem)],
     ]),
     expected: new NumberWithUnitValue(25, Meter, unitSystem),
   },
@@ -66,15 +68,15 @@ test.each([
   {
     input: "e ^ f",
     environment: new Map([
-      ["e", new NumberWithUnitValue(5, unitSystem.adimensional, unitSystem)],
-      ["f", new NumberWithUnitValue(2, unitSystem.adimensional, unitSystem)],
+      ["e", new NumberWithUnitValue(5, Adimensional, unitSystem)],
+      ["f", new NumberWithUnitValue(2, Adimensional, unitSystem)],
     ]),
-    expected: new NumberWithUnitValue(25, unitSystem.adimensional, unitSystem),
+    expected: new NumberWithUnitValue(25, Adimensional, unitSystem),
   },
   {
     input: "g ^ h",
     environment: new Map([
-      ["g", new NumberWithUnitValue(5, unitSystem.adimensional, unitSystem)],
+      ["g", new NumberWithUnitValue(5, Adimensional, unitSystem)],
       ["h", new NumberWithUnitValue(2, Meter, unitSystem)],
     ]),
     expected: new ErrorValue(
@@ -130,10 +132,7 @@ test.each([
         "EFCO2Diesel",
         new NumberWithUnitValue(2.603, TonPerCubicMeter, unitSystem),
       ],
-      [
-        "FracBio",
-        new NumberWithUnitValue(0.12, unitSystem.adimensional, unitSystem),
-      ],
+      ["FracBio", new NumberWithUnitValue(0.12, Adimensional, unitSystem)],
     ]),
     expected: new NumberWithUnitValue(
       888.4758083357,
@@ -161,10 +160,7 @@ test.each([
         "DensityDiesel",
         new NumberWithUnitValue(840, KilogramPerCubicMeter, unitSystem),
       ],
-      [
-        "FracBio",
-        new NumberWithUnitValue(0.12, unitSystem.adimensional, unitSystem),
-      ],
+      ["FracBio", new NumberWithUnitValue(0.12, Adimensional, unitSystem)],
       [
         "EFCH4biodiesel",
         new NumberWithUnitValue(0.0003315946, TonPerCubicMeter, unitSystem),
