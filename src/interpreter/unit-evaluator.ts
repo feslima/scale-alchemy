@@ -1,9 +1,9 @@
 import {
-  Adimensional,
   convert,
   divideUnits,
   isUnitDimensionless,
   multiplyUnits,
+  QuantitySytem,
 } from "../units";
 import {
   ExpressionNode,
@@ -48,7 +48,7 @@ export class ErrorValue extends ValueObject {
 
 export class NumberWithUnitValue extends ValueObject {
   private _precision: number;
-  private _base: SystemBase;
+  private _system: QuantitySytem;
   private static _supportedOperators = new Set(["+", "-", "*", "/", "^"]);
 
   private _unit: Unit<Quantity[]>;
@@ -64,19 +64,19 @@ export class NumberWithUnitValue extends ValueObject {
   constructor(
     value: number,
     unit: Unit<Quantity[]>,
-    base: SystemBase,
+    system: QuantitySytem,
     precision = 7,
   ) {
     super(ObjectWithUnitType.NUMBER);
     this._value = value;
     this._precision = precision;
     this._unit = unit;
-    this._base = base;
+    this._system = system;
   }
 
   public equals(other: object): boolean {
     if (other instanceof NumberWithUnitValue) {
-      const factor = convert(this.unit, other.unit, this._base);
+      const factor = convert(this.unit, other.unit, this._system.base);
       if (isNaN(factor)) {
         return false;
       }
@@ -98,43 +98,43 @@ export class NumberWithUnitValue extends ValueObject {
 
     switch (operator) {
       case "+": {
-        const factor = convert(left.unit, right.unit, left._base);
+        const factor = convert(left.unit, right.unit, left._system.base);
         if (isNaN(factor)) {
           return new ErrorValue(
             `units '${left.unit.name}' and '${right.unit.name}' are incompatible`,
           );
         }
         const result = left.value * factor + right.value;
-        return new NumberWithUnitValue(result, right.unit, right._base);
+        return new NumberWithUnitValue(result, right.unit, right._system);
       }
       case "-": {
-        const factor = convert(left.unit, right.unit, left._base);
+        const factor = convert(left.unit, right.unit, left._system.base);
         if (isNaN(factor)) {
           return new ErrorValue(
             `units '${left.unit.name}' and '${right.unit.name}' are incompatible`,
           );
         }
         const result = left.value * factor - right.value;
-        return new NumberWithUnitValue(result, right.unit, right._base);
+        return new NumberWithUnitValue(result, right.unit, right._system);
       }
       case "*": {
         const result = left.value * right.value;
         const unit = multiplyUnits(left.unit, right.unit);
-        return new NumberWithUnitValue(result, unit, right._base);
+        return new NumberWithUnitValue(result, unit, right._system);
       }
       case "/": {
         const result = left.value / right.value;
         const unit = divideUnits(left.unit, right.unit);
-        return new NumberWithUnitValue(result, unit, right._base);
+        return new NumberWithUnitValue(result, unit, right._system);
       }
       default: {
-        if (!isUnitDimensionless(right.unit, right._base)) {
+        if (!isUnitDimensionless(right.unit, right._system.base)) {
           return new ErrorValue(
             "exponentiation only allowed if exponent is dimensionless",
           );
         }
         const result = Math.pow(left.value, right.value);
-        return new NumberWithUnitValue(result, left.unit, left._base);
+        return new NumberWithUnitValue(result, left.unit, left._system);
       }
     }
   }
@@ -146,13 +146,13 @@ export type EvaluationWithUnitEnvironmentType = Map<
 >;
 
 export class EvaluatorWithUnits {
-  private _systemBase: SystemBase;
+  private _system: QuantitySytem;
   private _environment: EvaluationWithUnitEnvironmentType;
   constructor(
-    unitSystemBase: SystemBase,
+    quantitySystem: QuantitySytem,
     environment: EvaluationWithUnitEnvironmentType,
   ) {
-    this._systemBase = unitSystemBase;
+    this._system = quantitySystem;
     this._environment = environment;
   }
 
@@ -167,8 +167,8 @@ export class EvaluatorWithUnits {
 
         return new NumberWithUnitValue(
           node.value,
-          Adimensional,
-          this._systemBase,
+          this._system.adimensional,
+          this._system,
         );
       }
       case "Identifier": {
@@ -233,7 +233,7 @@ export class EvaluatorWithUnits {
     switch (operator) {
       case "-":
         return right instanceof NumberWithUnitValue
-          ? new NumberWithUnitValue(-right.value, right.unit, this._systemBase)
+          ? new NumberWithUnitValue(-right.value, right.unit, this._system)
           : new ErrorValue(
               "object to the right of operator is not number type",
             );

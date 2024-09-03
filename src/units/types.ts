@@ -1,5 +1,6 @@
 type Quantity = string;
 type Dimension = number[];
+type SystemBase = Map<Quantity, Dimension>;
 
 interface BasicUnitInfo {
   readonly name: string;
@@ -21,5 +22,3 @@ interface CompositeUnit<
 }
 
 type Unit<Q extends Quantity[]> = SimpleUnit<OneOf<Q>> | CompositeUnit<Q, Q>;
-
-type SystemBase = Map<Quantity, Dimension>;

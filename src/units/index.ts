@@ -1,148 +1,3 @@
-type Dimensionless = "Dimensionless";
-type Length = "Length";
-type Mass = "Mass";
-type Time = "Time";
-type Energy = "Energy";
-type Volume = "Volume";
-type Density = "Density";
-
-export const Adimensional: SimpleUnit<Dimensionless> = {
-  name: "adimensional",
-  quantity: "Dimensionless",
-  factor: 1.0,
-  synonyms: [],
-};
-
-export const Meter: SimpleUnit<Length> = {
-  name: "meter",
-  quantity: "Length",
-  factor: 1.0,
-  synonyms: ["m", "meters"],
-};
-
-export const Kilometer: SimpleUnit<Length> = {
-  name: "kilometer",
-  quantity: "Length",
-  factor: 1e3,
-  synonyms: ["km", "kilometers"],
-};
-
-export const Foot: SimpleUnit<Length> = {
-  name: "foot",
-  quantity: "Length",
-  factor: 0.3048,
-  synonyms: ["ft", "feet"],
-};
-
-export const Centimeter: SimpleUnit<Length> = {
-  name: "centimeter",
-  quantity: "Length",
-  factor: 1e-2,
-  synonyms: ["cm", "centimeters"],
-};
-
-export const Kilogram: SimpleUnit<Mass> = {
-  name: "kilogram",
-  quantity: "Mass",
-  factor: 1.0e3,
-  synonyms: ["kg", "kilograms"],
-};
-
-export const Ton: SimpleUnit<Mass> = {
-  name: "ton",
-  quantity: "Mass",
-  factor: 1.0e6,
-  synonyms: ["ton", "mg", "tonnes", "megagrams"],
-};
-
-export const Gigagram: SimpleUnit<Mass> = {
-  name: "gigagram",
-  quantity: "Mass",
-  factor: 1.0e9,
-  synonyms: ["Gg", "gigagrams"],
-};
-
-export const Second: SimpleUnit<Time> = {
-  name: "second",
-  quantity: "Time",
-  factor: 1.0,
-  synonyms: ["s", "seconds"],
-};
-
-export const Hour: SimpleUnit<Time> = {
-  name: "hour",
-  quantity: "Time",
-  factor: 3.6e3,
-  synonyms: ["h", "hours"],
-};
-
-export const MegaWattHour: SimpleUnit<Energy> = {
-  name: "megawatt-hour",
-  quantity: "Energy",
-  factor: 3.6e9,
-  synonyms: ["MHh", "megawatt-hours"],
-};
-
-export const Megajoule: SimpleUnit<Energy> = {
-  name: "megajoule",
-  quantity: "Energy",
-  factor: 1.0e6,
-  synonyms: ["MJ", "megajoules"],
-};
-
-export const Terajoule: SimpleUnit<Energy> = {
-  name: "terajoule",
-  quantity: "Energy",
-  factor: 1.0e12,
-  synonyms: ["TJ", "terajoules"],
-};
-
-export const Stere: SimpleUnit<Volume> = {
-  name: "stere",
-  synonyms: ["st", "steres"],
-  quantity: "Volume",
-  factor: 1.0,
-};
-
-export const KilogramPerStere: SimpleUnit<Density> = {
-  name: "kilogram per stere",
-  synonyms: ["kg/st", "kg*st^-1"],
-  quantity: "Density",
-  factor: 1.0,
-};
-
-export const TonPerStere: SimpleUnit<Density> = {
-  name: "ton per stere",
-  synonyms: ["ton/st", "ton*st^-1"],
-  quantity: "Density",
-  factor: 1.0e3,
-};
-
-/* ------------------------ Composite Units ------------------------*/
-type Velocity = CompositeUnit<[Length], [Time]>;
-type Force = CompositeUnit<[Length, Mass], [Time]>;
-
-export const KiloMeterPerHour: Velocity = {
-  name: "kilometer per hour",
-  synonyms: ["km/h", "km*h^-1"],
-  dividend: [Kilometer],
-  divisor: [Hour],
-};
-
-export const MeterPerSecond: Velocity = {
-  name: "meter per second",
-  synonyms: ["m/s", "m*s^-1"],
-  dividend: [Meter],
-  divisor: [Second],
-};
-
-export const Newton: Force = {
-  name: "newton",
-  synonyms: ["N", "newtons"],
-  dividend: [Kilogram, Meter],
-  divisor: [Second],
-};
-
 function isSimpleUnit<T extends Quantity[]>(
   obj: Unit<T>,
 ): obj is SimpleUnit<OneOf<T>> {
@@ -166,10 +21,17 @@ function getFactor<T extends Quantity[]>(unit: Unit<T>): number {
   return dividendFactor / divisorFactor;
 }
 
+type Dimensionless = "Dimensionless";
 /**
  * Remember to call `.initialize()` after adding your quantities.
  */
 export class QuantitySytem {
+  readonly adimensional: SimpleUnit<Dimensionless> = {
+    name: "adimensional",
+    quantity: "Dimensionless",
+    factor: 1.0,
+    synonyms: [],
+  };
   private _initialized: boolean = false;
   private _dimensions: Set<Quantity> = new Set();
 
