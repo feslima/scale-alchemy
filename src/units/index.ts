@@ -26,12 +26,13 @@ type Dimensionless = "Dimensionless";
  * Remember to call `.initialize()` after adding your quantities.
  */
 export class QuantitySytem {
-  readonly adimensional: SimpleUnit<Dimensionless> = {
+  readonly adimensional: SimpleUnit<Dimensionless> = Object.freeze({
     name: "adimensional",
     quantity: "Dimensionless",
     factor: 1.0,
     synonyms: [],
-  };
+  });
+
   private _initialized: boolean = false;
   private _dimensions: Set<Quantity> = new Set();
 
