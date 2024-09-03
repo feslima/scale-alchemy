@@ -84,17 +84,24 @@ export class QuantitySytem {
   }
 }
 
-export function extractUnits(
+function extractUnits(
   unit: Unit<Quantity[]>,
+  base: SystemBase,
 ): [SimpleUnit<Quantity>[], SimpleUnit<Quantity>[]] {
   const dividend: SimpleUnit<Quantity>[] = [];
   const divisor: SimpleUnit<Quantity>[] = [];
 
   if (isSimpleUnit(unit)) {
-    dividend.push(unit);
+    if (!isUnitDimensionless(unit, base)) {
+      dividend.push(unit);
+    }
   } else {
-    unit.dividend.forEach((u) => dividend.push(u));
-    unit.divisor.forEach((u) => divisor.push(u));
+    unit.dividend
+      .filter((u) => !isUnitDimensionless(u, base))
+      .forEach((u) => dividend.push(u));
+    unit.divisor
+      .filter((u) => !isUnitDimensionless(u, base))
+      .forEach((u) => divisor.push(u));
   }
 
   return [dividend, divisor];
@@ -103,9 +110,10 @@ export function extractUnits(
 export function multiplyUnits(
   first: Unit<Quantity[]>,
   second: Unit<Quantity[]>,
+  base: SystemBase,
 ): CompositeUnit<Quantity[], Quantity[]> {
-  const [dividendFirst, divisorFirst] = extractUnits(first);
-  const [dividendSecond, divisorSecond] = extractUnits(second);
+  const [dividendFirst, divisorFirst] = extractUnits(first, base);
+  const [dividendSecond, divisorSecond] = extractUnits(second, base);
 
   const dividend: SimpleUnit<Quantity>[] = [];
   const divisor: SimpleUnit<Quantity>[] = [];
@@ -127,9 +135,10 @@ export function multiplyUnits(
 export function divideUnits(
   first: Unit<Quantity[]>,
   second: Unit<Quantity[]>,
+  base: SystemBase,
 ): CompositeUnit<Quantity[], Quantity[]> {
-  const [dividendFirst, divisorFirst] = extractUnits(first);
-  const [dividendSecond, divisorSecond] = extractUnits(second);
+  const [dividendFirst, divisorFirst] = extractUnits(first, base);
+  const [dividendSecond, divisorSecond] = extractUnits(second, base);
 
   const dividend: SimpleUnit<Quantity>[] = [];
   const divisor: SimpleUnit<Quantity>[] = [];

@@ -49,7 +49,6 @@ export class ErrorValue extends ValueObject {
 
 export class NumberWithUnitValue extends ValueObject {
   private _precision: number;
-  private _system: QuantitySytem;
   private static _supportedOperators = new Set<string>([
     TokenType.PLUS,
     TokenType.MINUS,
@@ -57,6 +56,11 @@ export class NumberWithUnitValue extends ValueObject {
     TokenType.SLASH,
     TokenType.CARET,
   ]);
+
+  private _system: QuantitySytem;
+  public get system(): QuantitySytem {
+    return this._system;
+  }
 
   private _unit: Unit<Quantity[]>;
   public get unit(): Unit<Quantity[]> {
@@ -105,43 +109,43 @@ export class NumberWithUnitValue extends ValueObject {
 
     switch (operator) {
       case TokenType.PLUS: {
-        const factor = convert(left.unit, right.unit, left._system.base);
+        const factor = convert(left.unit, right.unit, left.system.base);
         if (isNaN(factor)) {
           return new ErrorValue(
             `units '${left.unit.name}' and '${right.unit.name}' are incompatible`,
           );
         }
         const result = left.value * factor + right.value;
-        return new NumberWithUnitValue(result, right.unit, right._system);
+        return new NumberWithUnitValue(result, right.unit, right.system);
       }
       case TokenType.MINUS: {
-        const factor = convert(left.unit, right.unit, left._system.base);
+        const factor = convert(left.unit, right.unit, left.system.base);
         if (isNaN(factor)) {
           return new ErrorValue(
             `units '${left.unit.name}' and '${right.unit.name}' are incompatible`,
           );
         }
         const result = left.value * factor - right.value;
-        return new NumberWithUnitValue(result, right.unit, right._system);
+        return new NumberWithUnitValue(result, right.unit, right.system);
       }
       case TokenType.ASTERISK: {
         const result = left.value * right.value;
-        const unit = multiplyUnits(left.unit, right.unit);
-        return new NumberWithUnitValue(result, unit, right._system);
+        const unit = multiplyUnits(left.unit, right.unit, left.system.base);
+        return new NumberWithUnitValue(result, unit, right.system);
       }
       case TokenType.SLASH: {
         const result = left.value / right.value;
-        const unit = divideUnits(left.unit, right.unit);
-        return new NumberWithUnitValue(result, unit, right._system);
+        const unit = divideUnits(left.unit, right.unit, left.system.base);
+        return new NumberWithUnitValue(result, unit, right.system);
       }
       default: {
-        if (!isUnitDimensionless(right.unit, right._system.base)) {
+        if (!isUnitDimensionless(right.unit, right.system.base)) {
           return new ErrorValue(
             "exponentiation only allowed if exponent is dimensionless",
           );
         }
         const result = Math.pow(left.value, right.value);
-        return new NumberWithUnitValue(result, left.unit, left._system);
+        return new NumberWithUnitValue(result, left.unit, left.system);
       }
     }
   }
