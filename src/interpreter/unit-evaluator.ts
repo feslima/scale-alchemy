@@ -68,6 +68,11 @@ export class NumberWithUnitValue extends ValueObject {
     this._unit = unit;
   }
 
+  public convertTo(unit: Unit<Quantity[]>): number {
+    const factor = this.unit.convertTo(unit);
+    return this.value * factor;
+  }
+
   public equals(other: object): boolean {
     if (other instanceof NumberWithUnitValue) {
       const factor = this.unit.convertTo(other.unit);

@@ -1,11 +1,8 @@
 import { expect, test } from "vitest";
 import {
-  ErrorValue,
+  evaluate,
   EvaluationWithUnitEnvironmentType,
-  EvaluatorWithUnits,
-  Lexer,
   NumberWithUnitValue,
-  Parser,
 } from "../src";
 import {
   CubicMeter,
@@ -28,7 +25,7 @@ import {
 interface EmissionFactorCalculationTestCase {
   input: string;
   environment?: EvaluationWithUnitEnvironmentType;
-  expected: NumberWithUnitValue;
+  expected: NumberWithUnitValue | string;
 }
 
 UnitSystem.add("Length", Meter);
@@ -62,9 +59,7 @@ test.each([
       ["c", new NumberWithUnitValue(5, Meter)],
       ["d", new NumberWithUnitValue(2, Meter)],
     ]),
-    expected: new ErrorValue(
-      "exponentiation only allowed if exponent is dimensionless",
-    ),
+    expected: "exponentiation only allowed if exponent is dimensionless",
   },
   {
     input: "e ^ f",
@@ -80,26 +75,22 @@ test.each([
       ["g", new NumberWithUnitValue(5, Adimensional)],
       ["h", new NumberWithUnitValue(2, Meter)],
     ]),
-    expected: new ErrorValue(
-      "exponentiation only allowed if exponent is dimensionless",
-    ),
+    expected: "exponentiation only allowed if exponent is dimensionless",
   },
 ] as EmissionFactorCalculationTestCase[])(
   "basic evaluation with units of: $input",
   ({ input, environment, expected }) => {
-    const expressionTree = new Parser(new Lexer(input)).parse();
-    const evaluator = new EvaluatorWithUnits(
+    const result = evaluate(
+      input,
       UnitSystem,
       environment !== undefined ? environment : new Map(),
     );
 
-    const result = evaluator.evaluate(expressionTree);
-    if (expected instanceof ErrorValue) {
-      expect(result).instanceof(ErrorValue);
-      expect(result).to.have.property("message").be.equal(expected.message);
+    if (typeof expected === "string") {
+      expect(result).to.have.property("error").be.equal(expected);
     } else {
-      expect(result.constructor.name).to.be.equal(expected.constructor.name);
-      expect(result.equals(expected)).to.be.true;
+      const actual = result.value.convertTo(expected.unit);
+      expect(actual).to.be.closeTo(expected.value, 1e-6);
     }
   },
 );
@@ -156,19 +147,17 @@ test.each([
 ] as EmissionFactorCalculationTestCase[])(
   "realistic evaluation with units of: $input",
   ({ input, environment, expected }) => {
-    const expressionTree = new Parser(new Lexer(input)).parse();
-    const evaluator = new EvaluatorWithUnits(
+    const result = evaluate(
+      input,
       UnitSystem,
       environment !== undefined ? environment : new Map(),
     );
 
-    const result = evaluator.evaluate(expressionTree);
-    if (expected instanceof ErrorValue) {
-      expect(result).instanceof(ErrorValue);
-      expect(result).to.have.property("message").be.equal(expected.message);
+    if (typeof expected === "string") {
+      expect(result).to.have.property("error").be.equal(expected);
     } else {
-      expect(result.constructor.name).to.be.equal(expected.constructor.name);
-      expect(result.equals(expected)).to.be.true;
+      const actual = result.value.convertTo(expected.unit);
+      expect(actual).to.be.closeTo(expected.value, 1e-6);
     }
   },
 );
