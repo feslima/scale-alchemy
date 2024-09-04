@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "lts/20"
+          node-version: 20
       - name: Install dependencies
         run: npm install
       - name: Run check
@@ -34,7 +34,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "lts/20"
+          node-version: 20
       - name: Install semantic-release
         run: npm install -g semantic-release conventional-changelog-conventionalcommits
       - name: Release if running on main
