@@ -24,7 +24,7 @@ import {
 
 interface EmissionFactorCalculationTestCase {
   input: string;
-  environment?: EvaluationWithUnitEnvironmentType;
+  environment: EvaluationWithUnitEnvironmentType;
   expected: NumberWithUnitValue | string;
 }
 
@@ -80,11 +80,7 @@ test.each([
 ] as EmissionFactorCalculationTestCase[])(
   "basic evaluation with units of: $input",
   ({ input, environment, expected }) => {
-    const result = evaluate(
-      input,
-      UnitSystem,
-      environment !== undefined ? environment : new Map(),
-    );
+    const result = evaluate(input, UnitSystem, environment);
 
     if (typeof expected === "string") {
       expect(result).to.have.property("error").be.equal(expected);
@@ -147,11 +143,7 @@ test.each([
 ] as EmissionFactorCalculationTestCase[])(
   "realistic evaluation with units of: $input",
   ({ input, environment, expected }) => {
-    const result = evaluate(
-      input,
-      UnitSystem,
-      environment !== undefined ? environment : new Map(),
-    );
+    const result = evaluate(input, UnitSystem, environment);
 
     if (typeof expected === "string") {
       expect(result).to.have.property("error").be.equal(expected);
