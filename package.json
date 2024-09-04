@@ -1,5 +1,8 @@
 {
+  "name": "scale-alchemy",
+  "version": "0.2.1",
   "scripts": {
+    "prepare": "husky",
     "check": "tsc --noEmit",
     "test": "vitest run"
   },
@@ -7,6 +10,43 @@
     "typescript": "^5.5.4"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.4.1",
+    "@commitlint/config-conventional": "^19.4.1",
+    "husky": "^9.1.5",
+    "semantic-release": "^24.1.0",
     "vitest": "^2.0.5"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      [
+        "@semantic-release/commit-analyzer",
+        {
+          "preset": "conventionalcommits"
+        }
+      ],
+      [
+        "@semantic-release/release-notes-generator",
+        {
+          "preset": "conventionalcommits"
+        }
+      ],
+      [
+        "@semantic-release/npm",
+        {
+          "npmPublish": false
+        }
+      ],
+      [
+        "@semantic-release/github"
+      ]
+    ]
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
   }
 }
