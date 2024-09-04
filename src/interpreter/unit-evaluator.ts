@@ -51,11 +51,6 @@ export class NumberWithUnitValue extends ValueObject {
     TokenType.CARET,
   ]);
 
-  private _system: QuantitySytem;
-  public get system(): QuantitySytem {
-    return this._system;
-  }
-
   private _unit: Unit<Quantity[]>;
   public get unit(): Unit<Quantity[]> {
     return this._unit;
@@ -66,22 +61,16 @@ export class NumberWithUnitValue extends ValueObject {
     return this._value;
   }
 
-  constructor(
-    value: number,
-    unit: Unit<Quantity[]>,
-    system: QuantitySytem,
-    precision = 7,
-  ) {
+  constructor(value: number, unit: Unit<Quantity[]>, precision = 7) {
     super(ObjectWithUnitType.NUMBER);
     this._value = value;
     this._precision = precision;
     this._unit = unit;
-    this._system = system;
   }
 
   public equals(other: object): boolean {
     if (other instanceof NumberWithUnitValue) {
-      const factor = this.unit.convertTo(other.unit, this._system.base);
+      const factor = this.unit.convertTo(other.unit);
       if (isNaN(factor)) {
         return false;
       }
@@ -103,43 +92,43 @@ export class NumberWithUnitValue extends ValueObject {
 
     switch (operator) {
       case TokenType.PLUS: {
-        const factor = left.unit.convertTo(right.unit, left.system.base);
+        const factor = left.unit.convertTo(right.unit);
         if (isNaN(factor)) {
           return new ErrorValue(
             `units '${left.unit.name}' and '${right.unit.name}' are incompatible`,
           );
         }
         const result = left.value * factor + right.value;
-        return new NumberWithUnitValue(result, right.unit, right.system);
+        return new NumberWithUnitValue(result, right.unit);
       }
       case TokenType.MINUS: {
-        const factor = left.unit.convertTo(right.unit, left.system.base);
+        const factor = left.unit.convertTo(right.unit);
         if (isNaN(factor)) {
           return new ErrorValue(
             `units '${left.unit.name}' and '${right.unit.name}' are incompatible`,
           );
         }
         const result = left.value * factor - right.value;
-        return new NumberWithUnitValue(result, right.unit, right.system);
+        return new NumberWithUnitValue(result, right.unit);
       }
       case TokenType.ASTERISK: {
         const result = left.value * right.value;
-        const unit = left.unit.multiply(right.unit, left.system.base);
-        return new NumberWithUnitValue(result, unit, right.system);
+        const unit = left.unit.multiply(right.unit);
+        return new NumberWithUnitValue(result, unit);
       }
       case TokenType.SLASH: {
         const result = left.value / right.value;
-        const unit = left.unit.divide(right.unit, left.system.base);
-        return new NumberWithUnitValue(result, unit, right.system);
+        const unit = left.unit.divide(right.unit);
+        return new NumberWithUnitValue(result, unit);
       }
       default: {
-        if (!right.unit.isDimensionless(right.system.base)) {
+        if (!right.unit.isDimensionless) {
           return new ErrorValue(
             "exponentiation only allowed if exponent is dimensionless",
           );
         }
         const result = Math.pow(left.value, right.value);
-        return new NumberWithUnitValue(result, left.unit, left.system);
+        return new NumberWithUnitValue(result, left.unit);
       }
     }
   }
@@ -170,11 +159,7 @@ export class EvaluatorWithUnits {
           );
         }
 
-        return new NumberWithUnitValue(
-          node.value,
-          this._system.adimensional,
-          this._system,
-        );
+        return new NumberWithUnitValue(node.value, this._system.adimensional);
       }
       case "Identifier": {
         if (!(node instanceof IdentifierExpressionNode)) {
@@ -238,7 +223,7 @@ export class EvaluatorWithUnits {
     switch (operator) {
       case "-":
         return right instanceof NumberWithUnitValue
-          ? new NumberWithUnitValue(-right.value, right.unit, this._system)
+          ? new NumberWithUnitValue(-right.value, right.unit)
           : new ErrorValue(
               "object to the right of operator is not number type",
             );
