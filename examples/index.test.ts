@@ -1,14 +1,17 @@
 import { expect, test } from "vitest";
-import { Lexer } from "../interpreter/lexer";
-import { Parser } from "../interpreter/parser";
 import {
   ErrorValue,
   EvaluationWithUnitEnvironmentType,
   EvaluatorWithUnits,
+  Lexer,
   NumberWithUnitValue,
-} from "../interpreter/unit-evaluator";
-import { QuantitySytem } from "../units";
+  Parser,
+  QuantitySytem,
+} from "../src";
 import {
+  CubicMeter,
+  Gram,
+  Joule,
   KilocaloriePerKilogram,
   KilogramPerCubicMeter,
   KilogramPerStere,
@@ -29,11 +32,10 @@ interface EmissionFactorCalculationTestCase {
 }
 
 const unitSystem = new QuantitySytem();
-unitSystem.add("Length");
-unitSystem.add("Mass");
-unitSystem.add("Energy");
-unitSystem.add("Volume");
-unitSystem.add("Density");
+unitSystem.add("Length", Meter);
+unitSystem.add("Mass", Gram);
+unitSystem.add("Energy", Joule);
+unitSystem.add("Volume", CubicMeter);
 unitSystem.initialize();
 
 const Adimensional = unitSystem.adimensional;

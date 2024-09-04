@@ -1,111 +1,86 @@
 import { expect, test } from "vitest";
-import { convert, QuantitySytem } from ".";
+import { CompositeUnit, QuantitySytem, SimpleUnit } from ".";
 
-const Meter = {
-  name: "meter",
-  quantity: "Length",
-  factor: 1.0,
-  synonyms: ["m", "meters"],
-};
+const Meter = new SimpleUnit("meter", ["m", "meters"], "Length", 1.0);
 
-const Centimeter = {
-  name: "centimeter",
-  quantity: "Length",
-  factor: 1.0e-2,
-  synonyms: ["cm", "centimeters"],
-};
+const Centimeter = new SimpleUnit(
+  "centimeter",
+  ["cm", "centimeters"],
+  "Length",
+  1.0e-2,
+);
 
-const Foot = {
-  name: "foot",
-  quantity: "Length",
-  factor: 0.3048,
-  synonyms: ["ft", "feet"],
-};
+const Foot = new SimpleUnit("foot", ["ft", "feet"], "Length", 0.3048);
 
-const Kilometer = {
-  name: "kilometer",
-  quantity: "Length",
-  factor: 1e3,
-  synonyms: ["km", "kilometers"],
-};
+const Kilometer = new SimpleUnit(
+  "kilometer",
+  ["km", "kilometers"],
+  "Length",
+  1e3,
+);
 
-const Kilogram = {
-  name: "kilogram",
-  quantity: "Mass",
-  factor: 1.0e3,
-  synonyms: ["kg", "kilograms"],
-};
+const Gram = new SimpleUnit("gram", ["g", "grams"], "Mass", 1.0);
 
-const Ton = {
-  name: "ton",
-  quantity: "Mass",
-  factor: 1.0e6,
-  synonyms: ["ton", "mg", "tonnes", "megagrams"],
-};
+const Kilogram = new SimpleUnit("kilogram", ["kg", "kilograms"], "Mass", 1.0e3);
 
-const Gigagram = {
-  name: "gigagram",
-  quantity: "Mass",
-  factor: 1.0e9,
-  synonyms: ["Gg", "gigagrams"],
-};
+const Ton = new SimpleUnit(
+  "ton",
+  ["ton", "mg", "tonnes", "megagrams"],
+  "Mass",
+  1.0e6,
+);
 
-const MegaWattHour = {
-  name: "megawatt-hour",
-  quantity: "Energy",
-  factor: 3.6e9,
-  synonyms: ["MHh", "megawatt-hours"],
-};
+const Gigagram = new SimpleUnit("gigagram", ["Gg", "gigagrams"], "Mass", 1.0e9);
 
-const Terajoule = {
-  name: "terajoule",
-  quantity: "Energy",
-  factor: 1.0e12,
-  synonyms: ["TJ", "terajoules"],
-};
+const MegaWattHour = new SimpleUnit(
+  "megawatt-hour",
+  ["MHh", "megawatt-hours"],
+  "Energy",
+  3.6e9,
+);
 
-const Stere = {
-  name: "stere",
-  synonyms: ["st", "steres"],
-  quantity: "Volume",
-  factor: 1.0,
-};
+const Joule = new SimpleUnit("joule", ["J", "joules"], "Energy", 1.0);
 
-const Second = {
-  name: "second",
-  synonyms: ["s", "seconds"],
-  quantity: "Time",
-  factor: 1,
-};
+const Terajoule = new SimpleUnit(
+  "terajoule",
+  ["TJ", "terajoules"],
+  "Energy",
+  1.0e12,
+);
 
-const Hour = {
-  name: "hour",
-  synonyms: ["h", "hours"],
-  quantity: "Time",
-  factor: 3600,
-};
+const CubicMeter = new SimpleUnit(
+  "cubic meter",
+  ["m^3", "cubic meters"],
+  "Volume",
+  1.0,
+);
 
-const MeterPerSecond = {
-  name: "meter per second",
-  synonyms: ["m/s", "meters per second"],
-  dividend: [Meter],
-  divisor: [Second],
-};
+const Stere = new SimpleUnit("stere", ["st", "steres"], "Volume", 1.0);
 
-const KilometerPerHour = {
-  name: "kilometer per hour",
-  synonyms: ["km/h", "kilometers per hour"],
-  dividend: [Kilometer],
-  divisor: [Hour],
-};
+const Second = new SimpleUnit("second", ["s", "seconds"], "Time", 1);
+
+const Hour = new SimpleUnit("hour", ["h", "hours"], "Time", 3600);
+
+const MeterPerSecond = new CompositeUnit(
+  "meter per second",
+  ["m/s", "meters per second"],
+  [Meter],
+  [Second],
+);
+
+const KilometerPerHour = new CompositeUnit(
+  "kilometer per hour",
+  ["km/h", "kilometers per hour"],
+  [Kilometer],
+  [Hour],
+);
 
 const unitSystem = new QuantitySytem();
-unitSystem.add("Length");
-unitSystem.add("Mass");
-unitSystem.add("Time");
-unitSystem.add("Energy");
-unitSystem.add("Volume");
-unitSystem.add("Density");
+unitSystem.add("Length", Meter);
+unitSystem.add("Mass", Gram);
+unitSystem.add("Time", Second);
+unitSystem.add("Energy", Joule);
+unitSystem.add("Volume", CubicMeter);
 unitSystem.initialize();
 
 test.each([
@@ -124,7 +99,7 @@ test.each([
 ])(
   "simple conversion: $source.name to $destination.name -> %f",
   ({ source, destination, expected }) => {
-    const result = convert(source, destination, unitSystem.base);
+    const result = source.convertTo(destination, unitSystem.base);
     if (isNaN(expected)) {
       expect(result).to.be.NaN;
     } else {
@@ -147,19 +122,14 @@ test.each([
     expected: NaN,
   },
   {
-    source: {
-      name: "composite adimensional",
-      synonyms: [],
-      dividend: [Meter],
-      divisor: [Meter],
-    },
+    source: new CompositeUnit("composite adimensional", [], [Meter], [Meter]),
     destination: unitSystem.adimensional,
     expected: 1,
   },
 ])(
   "composite conversion: $source.name to $destination.name -> %i",
   ({ source, destination, expected }) => {
-    const result = convert(source, destination, unitSystem.base);
+    const result = source.convertTo(destination, unitSystem.base);
     if (isNaN(expected)) {
       expect(result).to.be.NaN;
     } else {
@@ -170,22 +140,21 @@ test.each([
 
 test("tCH4/st", () => {
   const system = new QuantitySytem();
-  system.add("Length");
-  system.add("Mass");
-  system.add("Time");
-  system.add("Energy");
-  system.add("Volume");
-  system.add("Density");
+  system.add("Length", Meter);
+  system.add("Mass", Gram);
+  system.add("Time", Second);
+  system.add("Energy", Joule);
+  system.add("Volume", CubicMeter);
   system.initialize();
 
   const base = system.base;
 
-  const inputUnit = {
-    name: "unit we have",
-    synonyms: ["kg^2*TJ*TJ^-1*st^-1*Gg^-1"],
-    dividend: [Kilogram, Kilogram, Terajoule],
-    divisor: [Terajoule, Stere, Gigagram],
-  };
+  const inputUnit = new CompositeUnit(
+    "unit we have",
+    ["kg^2*TJ*TJ^-1*st^-1*Gg^-1"],
+    [Kilogram, Kilogram, Terajoule],
+    [Terajoule, Stere, Gigagram],
+  );
   const desiredUnit = {
     name: "unit we want",
     synonyms: ["ton * st^-1"],
@@ -193,28 +162,27 @@ test("tCH4/st", () => {
     divisor: [Stere],
   };
 
-  const result = 300 * 390 * 15.6 * convert(inputUnit, desiredUnit, base);
+  const result = 300 * 390 * 15.6 * inputUnit.convertTo(desiredUnit, base);
   expect(result).to.be.closeTo(1.8252e-3, 1e-6);
 });
 
 test("MWh/st", () => {
   const system = new QuantitySytem();
-  system.add("Length");
-  system.add("Mass");
-  system.add("Time");
-  system.add("Energy");
-  system.add("Volume");
-  system.add("Density");
+  system.add("Length", Meter);
+  system.add("Mass", Gram);
+  system.add("Time", Second);
+  system.add("Energy", Joule);
+  system.add("Volume", CubicMeter);
   system.initialize();
 
   const base = system.base;
 
-  const inputUnit = {
-    name: "unit we have",
-    synonyms: ["TJ * st^-1"],
-    dividend: [Kilogram, Terajoule],
-    divisor: [Gigagram, Stere],
-  };
+  const inputUnit = new CompositeUnit(
+    "unit we have",
+    ["TJ * st^-1"],
+    [Kilogram, Terajoule],
+    [Gigagram, Stere],
+  );
   const desiredUnit = {
     name: "unit we want",
     synonyms: ["MWh * st^-1"],
@@ -222,6 +190,6 @@ test("MWh/st", () => {
     divisor: [Stere],
   };
 
-  const result = 390 * 15.6 * convert(inputUnit, desiredUnit, base);
+  const result = 390 * 15.6 * inputUnit.convertTo(desiredUnit, base);
   expect(result).to.be.closeTo(1.69, 1e-6);
 });

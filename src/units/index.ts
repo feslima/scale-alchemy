@@ -1,6 +1,84 @@
+export class SimpleUnit<Q extends Quantity> implements ISimpleUnit<Q> {
+  private _quantity: Q;
+  public get quantity(): Q {
+    return this._quantity;
+  }
+
+  private _factor: number;
+  public get factor(): number {
+    return this._factor;
+  }
+
+  private _name: string;
+  public get name(): string {
+    return this._name;
+  }
+
+  private _synonyms: string[];
+  public get synonyms(): string[] {
+    return this._synonyms;
+  }
+
+  constructor(name: string, synonyms: string[], quantity: Q, factor: number) {
+    this._name = name;
+    this._synonyms = synonyms;
+    this._quantity = quantity;
+    this._factor = factor;
+  }
+
+  public convertTo(to: Unit<Quantity[]>, base: SystemBase): number {
+    return convert(this, to, base);
+  }
+
+  public convertFrom(from: Unit<Quantity[]>, base: SystemBase): number {
+    return convert(from, this, base);
+  }
+}
+
+export class CompositeUnit implements ICompositeUnit<Quantity[], Quantity[]> {
+  private _name: string;
+  public get name(): string {
+    return this._name;
+  }
+
+  private _synonyms: string[];
+  public get synonyms(): string[] {
+    return this._synonyms;
+  }
+
+  private _dividend: ISimpleUnit<Quantity>[];
+  public get dividend(): ISimpleUnit<Quantity>[] {
+    return this._dividend;
+  }
+
+  private _divisor: ISimpleUnit<Quantity>[];
+  public get divisor(): ISimpleUnit<Quantity>[] {
+    return this._divisor;
+  }
+
+  constructor(
+    name: string,
+    synonyms: string[],
+    dividend: ISimpleUnit<Quantity>[],
+    divisor: ISimpleUnit<Quantity>[],
+  ) {
+    this._name = name;
+    this._synonyms = synonyms;
+    this._dividend = dividend;
+    this._divisor = divisor;
+  }
+  public convertTo(to: Unit<Quantity[]>, base: SystemBase): number {
+    return convert(this, to, base);
+  }
+
+  public convertFrom(from: Unit<Quantity[]>, base: SystemBase): number {
+    return convert(from, this, base);
+  }
+}
+
 function isSimpleUnit<T extends Quantity[]>(
   obj: Unit<T>,
-): obj is SimpleUnit<OneOf<T>> {
+): obj is ISimpleUnit<OneOf<T>> {
   return "factor" in obj;
 }
 
@@ -26,16 +104,17 @@ type Dimensionless = "Dimensionless";
  * Remember to call `.initialize()` after adding your quantities.
  */
 export class QuantitySytem {
-  readonly adimensional: SimpleUnit<Dimensionless> = Object.freeze({
-    name: "adimensional",
-    quantity: "Dimensionless",
-    factor: 1.0,
-    synonyms: [],
-  });
+  readonly adimensional: ISimpleUnit<Dimensionless> = new SimpleUnit(
+    "adimensional",
+    [],
+    "Dimensionless",
+    1.0,
+  );
 
   private _initialized: boolean = false;
   private _dimensions: Set<Quantity> = new Set();
 
+  private _defaultUnits: Map<Quantity, ISimpleUnit<Quantity>> = new Map();
   private _base: SystemBase = new Map();
   public get base(): SystemBase {
     if (!this._initialized) {
@@ -46,6 +125,7 @@ export class QuantitySytem {
 
   constructor() {
     this._dimensions.add("Dimensionless");
+    this._defaultUnits.set("Dimensionless", this.adimensional);
   }
 
   private throwIfInitialized() {
@@ -54,9 +134,10 @@ export class QuantitySytem {
     }
   }
 
-  public add(quantity: Quantity) {
+  public add(quantity: Quantity, defaultUnit: ISimpleUnit<Quantity>) {
     this.throwIfInitialized();
     this._dimensions.add(quantity);
+    this._defaultUnits.set(quantity, defaultUnit);
   }
 
   public initialize() {
@@ -87,9 +168,9 @@ export class QuantitySytem {
 function extractUnits(
   unit: Unit<Quantity[]>,
   base: SystemBase,
-): [SimpleUnit<Quantity>[], SimpleUnit<Quantity>[]] {
-  const dividend: SimpleUnit<Quantity>[] = [];
-  const divisor: SimpleUnit<Quantity>[] = [];
+): [ISimpleUnit<Quantity>[], ISimpleUnit<Quantity>[]] {
+  const dividend: ISimpleUnit<Quantity>[] = [];
+  const divisor: ISimpleUnit<Quantity>[] = [];
 
   if (isSimpleUnit(unit)) {
     if (!isUnitDimensionless(unit, base)) {
@@ -111,12 +192,12 @@ export function multiplyUnits(
   first: Unit<Quantity[]>,
   second: Unit<Quantity[]>,
   base: SystemBase,
-): CompositeUnit<Quantity[], Quantity[]> {
+): ICompositeUnit<Quantity[], Quantity[]> {
   const [dividendFirst, divisorFirst] = extractUnits(first, base);
   const [dividendSecond, divisorSecond] = extractUnits(second, base);
 
-  const dividend: SimpleUnit<Quantity>[] = [];
-  const divisor: SimpleUnit<Quantity>[] = [];
+  const dividend: ISimpleUnit<Quantity>[] = [];
+  const divisor: ISimpleUnit<Quantity>[] = [];
 
   dividendFirst.forEach((unit) => dividend.push(unit));
   dividendSecond.forEach((unit) => dividend.push(unit));
@@ -124,24 +205,19 @@ export function multiplyUnits(
   divisorFirst.forEach((unit) => divisor.push(unit));
   divisorSecond.forEach((unit) => divisor.push(unit));
 
-  return {
-    name: "generated",
-    synonyms: ["to be done"],
-    dividend,
-    divisor,
-  };
+  return new CompositeUnit("generated", ["to be done"], dividend, divisor);
 }
 
 export function divideUnits(
   first: Unit<Quantity[]>,
   second: Unit<Quantity[]>,
   base: SystemBase,
-): CompositeUnit<Quantity[], Quantity[]> {
+): ICompositeUnit<Quantity[], Quantity[]> {
   const [dividendFirst, divisorFirst] = extractUnits(first, base);
   const [dividendSecond, divisorSecond] = extractUnits(second, base);
 
-  const dividend: SimpleUnit<Quantity>[] = [];
-  const divisor: SimpleUnit<Quantity>[] = [];
+  const dividend: ISimpleUnit<Quantity>[] = [];
+  const divisor: ISimpleUnit<Quantity>[] = [];
 
   dividendFirst.forEach((unit) => dividend.push(unit));
   divisorSecond.forEach((unit) => dividend.push(unit));
@@ -149,12 +225,7 @@ export function divideUnits(
   divisorFirst.forEach((unit) => divisor.push(unit));
   dividendSecond.forEach((unit) => divisor.push(unit));
 
-  return {
-    name: "generated",
-    synonyms: ["to be done"],
-    dividend,
-    divisor,
-  };
+  return new CompositeUnit("generated", ["to be done"], dividend, divisor);
 }
 
 export function isUnitDimensionless(
@@ -170,7 +241,7 @@ export function isUnitDimensionless(
 export function getDimensionFromCompositeUnit<
   QDividend extends Quantity[],
   QDivisor extends Quantity[],
->(unit: CompositeUnit<QDividend, QDivisor>, base: SystemBase): Dimension {
+>(unit: ICompositeUnit<QDividend, QDivisor>, base: SystemBase): Dimension {
   let result: Dimension = [];
   let dividendDimension: Dimension = Array(base.size).fill(0);
   let divisorDimension: Dimension = Array(base.size).fill(0);

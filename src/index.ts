@@ -6,5 +6,5 @@ export {
   EvaluatorWithUnits,
   NumberWithUnitValue
 } from "./interpreter/unit-evaluator";
-export { QuantitySytem } from "./units";
+export { CompositeUnit, QuantitySytem, SimpleUnit } from "./units";
 

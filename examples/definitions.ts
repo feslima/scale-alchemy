@@ -1,9 +1,6 @@
-export const Meter = {
-  name: "meter",
-  quantity: "Length",
-  factor: 1.0,
-  synonyms: ["m", "meters"],
-};
+import { SimpleUnit } from "../src";
+
+export const Meter = new SimpleUnit("meter", ["m", "meters"], "Length", 1.0);
 
 export const Kilometer = {
   name: "kilometer",
@@ -11,6 +8,8 @@ export const Kilometer = {
   factor: 1e3,
   synonyms: ["km", "kilometers"],
 };
+
+export const Gram = new SimpleUnit("gram", ["g", "grams"], "Mass", 1.0);
 
 export const Kilogram = {
   name: "kilogram",
@@ -32,6 +31,8 @@ export const Gigagram = {
   factor: 1.0e9,
   synonyms: ["Gg", "gigagrams"],
 };
+
+export const Joule = new SimpleUnit("joule", ["J", "joules"], "Energy", 1.0);
 
 export const MegaWattHour = {
   name: "megawatt-hour",
@@ -61,12 +62,12 @@ export const Gigameter = {
   synonyms: ["gm", "gigameters"],
 };
 
-export const CubicMeter = {
-  name: "cubic meter",
-  synonyms: ["m^3", "cubic meters"],
-  quantity: "Volume",
-  factor: 1,
-};
+export const CubicMeter = new SimpleUnit(
+  "cubic meter",
+  ["m^3", "cubic meters"],
+  "Volume",
+  1,
+);
 
 export const Liter = {
   name: "liter",
