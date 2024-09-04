@@ -35,8 +35,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
-      - name: Install semantic-release
-        run: npm install -g semantic-release conventional-changelog-conventionalcommits
+      - name: Install dependencies
+        run: npm install
       - name: Release if running on main
         if: ${{ success() && github.ref == 'refs/heads/main' }}
         run: npx semantic-release
