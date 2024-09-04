@@ -1,6 +1,5 @@
 import { expect, test } from "vitest";
 import { CompositeUnit, QuantitySytem, SimpleUnit } from ".";
-
 const Meter = new SimpleUnit("meter", ["m", "meters"], "Length", 1.0);
 
 const Centimeter = new SimpleUnit(
@@ -155,12 +154,12 @@ test("tCH4/st", () => {
     [Kilogram, Kilogram, Terajoule],
     [Terajoule, Stere, Gigagram],
   );
-  const desiredUnit = {
-    name: "unit we want",
-    synonyms: ["ton * st^-1"],
-    dividend: [Ton],
-    divisor: [Stere],
-  };
+  const desiredUnit = new CompositeUnit(
+    "unit we want",
+    ["ton * st^-1"],
+    [Ton],
+    [Stere],
+  );
 
   const result = 300 * 390 * 15.6 * inputUnit.convertTo(desiredUnit, base);
   expect(result).to.be.closeTo(1.8252e-3, 1e-6);
@@ -183,12 +182,12 @@ test("MWh/st", () => {
     [Kilogram, Terajoule],
     [Gigagram, Stere],
   );
-  const desiredUnit = {
-    name: "unit we want",
-    synonyms: ["MWh * st^-1"],
-    dividend: [MegaWattHour],
-    divisor: [Stere],
-  };
+  const desiredUnit = new CompositeUnit(
+    "unit we want",
+    ["MWh * st^-1"],
+    [MegaWattHour],
+    [Stere],
+  );
 
   const result = 390 * 15.6 * inputUnit.convertTo(desiredUnit, base);
   expect(result).to.be.closeTo(1.69, 1e-6);
