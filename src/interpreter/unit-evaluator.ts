@@ -1,10 +1,4 @@
-import {
-  convert,
-  divideUnits,
-  isUnitDimensionless,
-  multiplyUnits,
-  QuantitySytem,
-} from "../units";
+import { QuantitySytem } from "../units";
 import {
   ExpressionNode,
   IdentifierExpressionNode,
@@ -87,7 +81,7 @@ export class NumberWithUnitValue extends ValueObject {
 
   public equals(other: object): boolean {
     if (other instanceof NumberWithUnitValue) {
-      const factor = convert(this.unit, other.unit, this._system.base);
+      const factor = this.unit.convertTo(other.unit, this._system.base);
       if (isNaN(factor)) {
         return false;
       }
@@ -109,7 +103,7 @@ export class NumberWithUnitValue extends ValueObject {
 
     switch (operator) {
       case TokenType.PLUS: {
-        const factor = convert(left.unit, right.unit, left.system.base);
+        const factor = left.unit.convertTo(right.unit, left.system.base);
         if (isNaN(factor)) {
           return new ErrorValue(
             `units '${left.unit.name}' and '${right.unit.name}' are incompatible`,
@@ -119,7 +113,7 @@ export class NumberWithUnitValue extends ValueObject {
         return new NumberWithUnitValue(result, right.unit, right.system);
       }
       case TokenType.MINUS: {
-        const factor = convert(left.unit, right.unit, left.system.base);
+        const factor = left.unit.convertTo(right.unit, left.system.base);
         if (isNaN(factor)) {
           return new ErrorValue(
             `units '${left.unit.name}' and '${right.unit.name}' are incompatible`,
@@ -130,16 +124,16 @@ export class NumberWithUnitValue extends ValueObject {
       }
       case TokenType.ASTERISK: {
         const result = left.value * right.value;
-        const unit = multiplyUnits(left.unit, right.unit, left.system.base);
+        const unit = left.unit.multiply(right.unit, left.system.base);
         return new NumberWithUnitValue(result, unit, right.system);
       }
       case TokenType.SLASH: {
         const result = left.value / right.value;
-        const unit = divideUnits(left.unit, right.unit, left.system.base);
+        const unit = left.unit.divide(right.unit, left.system.base);
         return new NumberWithUnitValue(result, unit, right.system);
       }
       default: {
-        if (!isUnitDimensionless(right.unit, right.system.base)) {
+        if (!right.unit.isDimensionless(right.system.base)) {
           return new ErrorValue(
             "exponentiation only allowed if exponent is dimensionless",
           );

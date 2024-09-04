@@ -3,11 +3,21 @@ type Dimension = number[];
 type SystemBase = Map<Quantity, Dimension>;
 
 interface IBasicUnitInfo {
+  readonly id: string;
   readonly name: string;
   readonly synonyms: string[];
 
   convertTo(to: Unit<Quantity[]>, base: SystemBase): number;
   convertFrom(from: Unit<Quantity[]>, base: SystemBase): number;
+  isDimensionless(base: SystemBase): boolean;
+  multiply(
+    unit: Unit<Quantity[]>,
+    base: SystemBase,
+  ): ICompositeUnit<Quantity[], Quantity[]>;
+  divide(
+    unit: Unit<Quantity[]>,
+    base: SystemBase,
+  ): ICompositeUnit<Quantity[], Quantity[]>;
 }
 
 interface ISimpleUnit<TQuantity extends Quantity> extends IBasicUnitInfo {

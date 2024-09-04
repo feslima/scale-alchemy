@@ -1,66 +1,61 @@
-import { SimpleUnit } from "../src";
+import { CompositeUnit, SimpleUnit } from "../src";
 
 export const Meter = new SimpleUnit("meter", ["m", "meters"], "Length", 1.0);
 
-export const Kilometer = {
-  name: "kilometer",
-  quantity: "Length",
-  factor: 1e3,
-  synonyms: ["km", "kilometers"],
-};
+export const Kilometer = new SimpleUnit(
+  "kilometer",
+  ["km", "kilometers"],
+  "Length",
+  1e3,
+);
 
 export const Gram = new SimpleUnit("gram", ["g", "grams"], "Mass", 1.0);
 
-export const Kilogram = {
-  name: "kilogram",
-  quantity: "Mass",
-  factor: 1.0e3,
-  synonyms: ["kg", "kilograms"],
-};
+export const Kilogram = new SimpleUnit(
+  "kilogram",
+  ["kg", "kilograms"],
+  "Mass",
+  1.0e3,
+);
 
-export const Ton = {
-  name: "ton",
-  quantity: "Mass",
-  factor: 1.0e6,
-  synonyms: ["ton", "mg", "tonnes", "megagrams"],
-};
+export const Ton = new SimpleUnit(
+  "ton",
+  ["ton", "mg", "tonnes", "megagrams"],
+  "Mass",
+  1.0e6,
+);
 
-export const Gigagram = {
-  name: "gigagram",
-  quantity: "Mass",
-  factor: 1.0e9,
-  synonyms: ["Gg", "gigagrams"],
-};
+export const Gigagram = new SimpleUnit(
+  "gigagram",
+  ["Gg", "gigagrams"],
+  "Mass",
+  1.0e9,
+);
 
 export const Joule = new SimpleUnit("joule", ["J", "joules"], "Energy", 1.0);
 
-export const MegaWattHour = {
-  name: "megawatt-hour",
-  quantity: "Energy",
-  factor: 3.6e9,
-  synonyms: ["MHh", "megawatt-hours"],
-};
+export const MegaWattHour = new SimpleUnit(
+  "megawatt-hour",
+  ["MHh", "megawatt-hours"],
+  "Energy",
+  3.6e9,
+);
 
-export const Terajoule = {
-  name: "terajoule",
-  quantity: "Energy",
-  factor: 1.0e12,
-  synonyms: ["TJ", "terajoules"],
-};
+export const Terajoule = new SimpleUnit(
+  "terajoule",
+  ["TJ", "terajoules"],
+  "Energy",
+  1.0e12,
+);
 
-export const Stere = {
-  name: "stere",
-  synonyms: ["st", "steres"],
-  quantity: "Volume",
-  factor: 1.0,
-};
+export const Stere = new SimpleUnit("stere", ["st", "steres"], "Volume", 1.0);
 
-export const Gigameter = {
-  name: "gigameter",
-  quantity: "Length",
-  factor: 1e9,
-  synonyms: ["gm", "gigameters"],
-};
+export const Gigameter = new SimpleUnit(
+  "gigameter",
+  ["gm", "gigameters"],
+  "Length",
+  1e9,
+);
 
 export const CubicMeter = new SimpleUnit(
   "cubic meter",
@@ -69,87 +64,82 @@ export const CubicMeter = new SimpleUnit(
   1,
 );
 
-export const Liter = {
-  name: "liter",
-  synonyms: ["L", "liters"],
-  quantity: "Volume",
-  factor: 1e-3,
-};
+export const Liter = new SimpleUnit("liter", ["L", "liters"], "Volume", 1e-3);
 
-export const Kilocalorie = {
-  name: "kilocalorie",
-  synonyms: ["kcal", "kilocalories"],
-  quantity: "Energy",
-  factor: 4186.8,
-};
+export const Kilocalorie = new SimpleUnit(
+  "kilocalorie",
+  ["kcal", "kilocalories"],
+  "Energy",
+  4186.8,
+);
 
 /* ------------------------- Composite units -------------------------*/
-export const KilometerPerLiter = {
-  name: "kilometer per liter",
-  synonyms: ["km/L", "kilometers per liter"],
-  dividend: [Kilometer],
-  divisor: [Liter],
-};
+export const KilometerPerLiter = new CompositeUnit(
+  "kilometer per liter",
+  ["km/L", "kilometers per liter"],
+  [Kilometer],
+  [Liter],
+);
 
-export const KilogramPerCubicMeter = {
-  name: "kilogram per cubic meter",
-  synonyms: ["kg/m^3", "kg*m^-3"],
-  dividend: [Kilogram],
-  divisor: [CubicMeter],
-};
+export const KilogramPerCubicMeter = new CompositeUnit(
+  "kilogram per cubic meter",
+  ["kg/m^3", "kg*m^-3"],
+  [Kilogram],
+  [CubicMeter],
+);
 
-export const KilogramPerStere = {
-  name: "kilogram per stere",
-  synonyms: ["kg/st", "kg*st^-1"],
-  dividend: [Kilogram],
-  divisor: [Stere],
-};
+export const KilogramPerStere = new CompositeUnit(
+  "kilogram per stere",
+  ["kg/st", "kg*st^-1"],
+  [Kilogram],
+  [Stere],
+);
 
-export const TonPerCubicMeter = {
-  name: "ton per cubic meter",
-  synonyms: ["ton/m^3", "ton*m^-3"],
-  dividend: [Ton],
-  divisor: [CubicMeter],
-};
+export const TonPerCubicMeter = new CompositeUnit(
+  "ton per cubic meter",
+  ["ton/m^3", "ton*m^-3"],
+  [Ton],
+  [CubicMeter],
+);
 
-export const TonPerStere = {
-  name: "ton per stere",
-  synonyms: ["ton/st", "ton*st^-1"],
-  dividend: [Ton],
-  divisor: [Stere],
-};
+export const TonPerStere = new CompositeUnit(
+  "ton per stere",
+  ["ton/st", "ton*st^-1"],
+  [Ton],
+  [Stere],
+);
 
-export const TonPerGigameter = {
-  name: "ton per gigameter",
-  synonyms: ["ton/Gm", "ton*Gm^-1"],
-  dividend: [Ton],
-  divisor: [Gigameter],
-};
+export const TonPerGigameter = new CompositeUnit(
+  "ton per gigameter",
+  ["ton/Gm", "ton*Gm^-1"],
+  [Ton],
+  [Gigameter],
+);
 
-export const KilogramPerTerajoule = {
-  name: "kilogram per terajoule",
-  synonyms: ["kg/TJ", "kg*TJ^-1"],
-  dividend: [Kilogram],
-  divisor: [Terajoule],
-};
+export const KilogramPerTerajoule = new CompositeUnit(
+  "kilogram per terajoule",
+  ["kg/TJ", "kg*TJ^-1"],
+  [Kilogram],
+  [Terajoule],
+);
 
-export const TerajoulePerGigaGram = {
-  name: "terajoule per gigagram",
-  synonyms: ["TJ * Gg^-1"],
-  dividend: [Terajoule],
-  divisor: [Gigagram],
-};
+export const TerajoulePerGigaGram = new CompositeUnit(
+  "terajoule per gigagram",
+  ["TJ * Gg^-1"],
+  [Terajoule],
+  [Gigagram],
+);
 
-export const MegawatthourPerStere = {
-  name: "MWh per st",
-  synonyms: ["MHh * st^-1"],
-  dividend: [MegaWattHour],
-  divisor: [Stere],
-};
+export const MegawatthourPerStere = new CompositeUnit(
+  "MWh per st",
+  ["MHh * st^-1"],
+  [MegaWattHour],
+  [Stere],
+);
 
-export const KilocaloriePerKilogram = {
-  name: "kcal per kg",
-  synonyms: ["kcal/kg"],
-  dividend: [Kilocalorie],
-  divisor: [Kilogram],
-};
+export const KilocaloriePerKilogram = new CompositeUnit(
+  "kcal per kg",
+  ["kcal/kg"],
+  [Kilocalorie],
+  [Kilogram],
+);

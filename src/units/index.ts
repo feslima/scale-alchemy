@@ -1,4 +1,16 @@
+import { randomUUID } from "crypto";
+
 export class SimpleUnit<Q extends Quantity> implements ISimpleUnit<Q> {
+  private _id: string;
+  public get id(): string {
+    return this._id;
+  }
+
+  private _name: string;
+  public get name(): string {
+    return this._name;
+  }
+
   private _quantity: Q;
   public get quantity(): Q {
     return this._quantity;
@@ -9,21 +21,21 @@ export class SimpleUnit<Q extends Quantity> implements ISimpleUnit<Q> {
     return this._factor;
   }
 
-  private _name: string;
-  public get name(): string {
-    return this._name;
-  }
-
   private _synonyms: string[];
   public get synonyms(): string[] {
     return this._synonyms;
   }
 
   constructor(name: string, synonyms: string[], quantity: Q, factor: number) {
+    this._id = name;
     this._name = name;
     this._synonyms = synonyms;
     this._quantity = quantity;
     this._factor = factor;
+  }
+
+  isDimensionless(base: SystemBase): boolean {
+    return isUnitDimensionless(this, base);
   }
 
   public convertTo(to: Unit<Quantity[]>, base: SystemBase): number {
@@ -33,9 +45,27 @@ export class SimpleUnit<Q extends Quantity> implements ISimpleUnit<Q> {
   public convertFrom(from: Unit<Quantity[]>, base: SystemBase): number {
     return convert(from, this, base);
   }
+
+  multiply(
+    unit: Unit<Quantity[]>,
+    base: SystemBase,
+  ): ICompositeUnit<Quantity[], Quantity[]> {
+    return multiplyUnits(this, unit, base);
+  }
+  divide(
+    unit: Unit<Quantity[]>,
+    base: SystemBase,
+  ): ICompositeUnit<Quantity[], Quantity[]> {
+    return divideUnits(this, unit, base);
+  }
 }
 
 export class CompositeUnit implements ICompositeUnit<Quantity[], Quantity[]> {
+  private _id: string;
+  public get id(): string {
+    return this._id;
+  }
+
   private _name: string;
   public get name(): string {
     return this._name;
@@ -61,18 +91,38 @@ export class CompositeUnit implements ICompositeUnit<Quantity[], Quantity[]> {
     synonyms: string[],
     dividend: ISimpleUnit<Quantity>[],
     divisor: ISimpleUnit<Quantity>[],
+    id?: string,
   ) {
+    this._id = id ?? randomUUID();
     this._name = name;
     this._synonyms = synonyms;
     this._dividend = dividend;
     this._divisor = divisor;
   }
+
+  isDimensionless(base: SystemBase): boolean {
+    return isUnitDimensionless(this, base);
+  }
+
   public convertTo(to: Unit<Quantity[]>, base: SystemBase): number {
     return convert(this, to, base);
   }
 
   public convertFrom(from: Unit<Quantity[]>, base: SystemBase): number {
     return convert(from, this, base);
+  }
+
+  multiply(
+    unit: Unit<Quantity[]>,
+    base: SystemBase,
+  ): ICompositeUnit<Quantity[], Quantity[]> {
+    return multiplyUnits(this, unit, base);
+  }
+  divide(
+    unit: Unit<Quantity[]>,
+    base: SystemBase,
+  ): ICompositeUnit<Quantity[], Quantity[]> {
+    return divideUnits(this, unit, base);
   }
 }
 
@@ -188,7 +238,7 @@ function extractUnits(
   return [dividend, divisor];
 }
 
-export function multiplyUnits(
+function multiplyUnits(
   first: Unit<Quantity[]>,
   second: Unit<Quantity[]>,
   base: SystemBase,
@@ -208,7 +258,7 @@ export function multiplyUnits(
   return new CompositeUnit("generated", ["to be done"], dividend, divisor);
 }
 
-export function divideUnits(
+function divideUnits(
   first: Unit<Quantity[]>,
   second: Unit<Quantity[]>,
   base: SystemBase,
@@ -228,7 +278,7 @@ export function divideUnits(
   return new CompositeUnit("generated", ["to be done"], dividend, divisor);
 }
 
-export function isUnitDimensionless(
+function isUnitDimensionless(
   unit: Unit<Quantity[]>,
   systemBase: SystemBase,
 ): boolean {
@@ -273,7 +323,7 @@ export function getDimensionFromCompositeUnit<
   return result;
 }
 
-export function getDimensionFromUnit<Q extends Quantity[]>(
+function getDimensionFromUnit<Q extends Quantity[]>(
   unit: Unit<Q>,
   base: SystemBase,
 ): Dimension | undefined {
