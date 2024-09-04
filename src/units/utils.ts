@@ -1,4 +1,5 @@
-export const DIMENSIONLESS = "Dimensionless";
+export type Dimensionless = "Dimensionless";
+export const DIMENSIONLESS = "Dimensionless" as Dimensionless;
 
 export function convert<S extends Quantity, D extends Quantity>(
   source: Unit<S[]>,

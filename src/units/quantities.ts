@@ -1,6 +1,6 @@
 import { CompositeUnit } from "./composite";
 import { SimpleUnit } from "./simple";
-import { DIMENSIONLESS } from "./utils";
+import { DIMENSIONLESS, Dimensionless } from "./utils";
 
 /**
  * Remember to call `.initialize()` after adding your quantities.
@@ -46,9 +46,7 @@ export class QuantitySytem {
     this._defaultUnits.set(quantity, defaultUnit);
   }
 
-  public initialize() {
-    this.throwIfInitialized();
-
+  private buildSystemMatrix() {
     const nDimensions = this._dimensions.size;
     this._dimensions.delete(DIMENSIONLESS);
     const dimensions: Quantity[] = [DIMENSIONLESS as Quantity].concat(
@@ -66,8 +64,14 @@ export class QuantitySytem {
         }
       }
     }
-    this._base = Object.freeze(this._base); // this is global to the unit system
+  }
 
+  public initialize() {
+    this.throwIfInitialized();
+
+    this.buildSystemMatrix();
+
+    this._base = Object.freeze(this._base); // this is global to the unit system
     this._initialized = true;
   }
 
