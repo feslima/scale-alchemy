@@ -3,50 +3,55 @@ import { QuantitySytem } from "./quantities";
 
 const unitSystem = new QuantitySytem();
 
-const Meter = unitSystem.newSimpleUnit("meter", ["m", "meters"], "Length", 1.0);
+const Meter = unitSystem.newSimpleUnit("meter", "m", ["meters"], "Length", 1.0);
 
 const Centimeter = unitSystem.newSimpleUnit(
   "centimeter",
-  ["cm", "centimeters"],
+  "cm",
+  ["centimeters"],
   "Length",
   1.0e-2,
 );
 
-const Foot = unitSystem.newSimpleUnit("foot", ["ft", "feet"], "Length", 0.3048);
+const Foot = unitSystem.newSimpleUnit("foot", "ft", ["feet"], "Length", 0.3048);
 
-const Gram = unitSystem.newSimpleUnit("gram", ["g", "grams"], "Mass", 1.0);
+const Gram = unitSystem.newSimpleUnit("gram", "g", ["grams"], "Mass", 1.0);
 
 const Kilogram = unitSystem.newSimpleUnit(
   "kilogram",
-  ["kg", "kilograms"],
+  "kg",
+  ["kilograms"],
   "Mass",
   1.0e3,
 );
 
 const MegaWattHour = unitSystem.newSimpleUnit(
   "megawatt-hour",
-  ["MHh", "megawatt-hours"],
+  "MHh",
+  ["megawatt-hours"],
   "Energy",
   3.6e9,
 );
 
-const Joule = unitSystem.newSimpleUnit("joule", ["J", "joules"], "Energy", 1.0);
+const Joule = unitSystem.newSimpleUnit("joule", "J", ["joules"], "Energy", 1.0);
 
 const Terajoule = unitSystem.newSimpleUnit(
   "terajoule",
-  ["TJ", "terajoules"],
+  "TJ",
+  ["terajoules"],
   "Energy",
   1.0e12,
 );
 
 const CubicMeter = unitSystem.newSimpleUnit(
   "cubic meter",
-  ["m^3", "cubic meters"],
+  "m^3",
+  ["cubic meters"],
   "Volume",
   1.0,
 );
 
-const Second = unitSystem.newSimpleUnit("second", ["s", "seconds"], "Time", 1);
+const Second = unitSystem.newSimpleUnit("second", "s", ["seconds"], "Time", 1);
 
 unitSystem.add("Length", Meter);
 unitSystem.add("Mass", Gram);

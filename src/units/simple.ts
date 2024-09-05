@@ -18,12 +18,13 @@ export class SimpleUnit<Q extends Quantity>
 
   constructor(
     name: string,
+    symbol: string,
     synonyms: string[],
     quantity: Q,
     factor: number,
     base: SystemBase,
   ) {
-    super(name, synonyms, base, name, base.get(quantity));
+    super(name, symbol, synonyms, base, name, base.get(quantity));
     this._quantity = quantity;
     this._factor = factor;
   }
@@ -50,6 +51,7 @@ export class SimpleUnit<Q extends Quantity>
 
     return new CompositeUnit(
       "generated",
+      "generated",
       ["to be done"],
       dividend,
       divisor,
@@ -70,6 +72,7 @@ export class SimpleUnit<Q extends Quantity>
     divisorSecond.forEach((unit) => dividend.push(unit));
 
     return new CompositeUnit(
+      "generated",
       "generated",
       ["to be done"],
       dividend,

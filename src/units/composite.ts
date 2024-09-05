@@ -18,6 +18,7 @@ export class CompositeUnit
 
   constructor(
     name: string,
+    symbol: string,
     synonyms: string[],
     dividend: ISimpleUnit<Quantity>[],
     divisor: ISimpleUnit<Quantity>[],
@@ -26,6 +27,7 @@ export class CompositeUnit
   ) {
     super(
       name,
+      symbol,
       synonyms,
       base,
       id ?? randomUUID(),
@@ -58,6 +60,7 @@ export class CompositeUnit
 
     return new CompositeUnit(
       "generated",
+      "generated",
       ["to be done"],
       dividend,
       divisor,
@@ -79,6 +82,7 @@ export class CompositeUnit
     dividendSecond.forEach((unit) => divisor.push(unit));
 
     return new CompositeUnit(
+      "generated",
       "generated",
       ["to be done"],
       dividend,

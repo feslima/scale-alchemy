@@ -16,12 +16,19 @@ export abstract class AbstractUnit implements IBasicUnitInfo {
     return this._name;
   }
 
+  private _symbol: string;
+  public get symbol(): string {
+    return this._symbol;
+  }
+
   private _synonyms: string[];
   public get synonyms(): string[] {
     return this._synonyms;
   }
+
   constructor(
     name: string,
+    symbol: string,
     synonyms: string[],
     base: SystemBase,
     id: string,
@@ -29,6 +36,7 @@ export abstract class AbstractUnit implements IBasicUnitInfo {
   ) {
     this._id = id;
     this._name = name;
+    this._symbol = symbol;
     this._synonyms = synonyms;
     this._base = base;
     this.dimension = dimension;

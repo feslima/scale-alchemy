@@ -6,6 +6,7 @@ type SystemBase = Map<Quantity, Dimension>;
 interface IBasicUnitInfo {
   readonly id: string;
   readonly name: string;
+  readonly symbol: string;
   readonly synonyms: string[];
   readonly dimension: Dimension | undefined;
   readonly isDimensionless: boolean;

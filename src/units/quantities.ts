@@ -25,6 +25,7 @@ export class QuantitySytem {
     this._base = new Map([[DIMENSIONLESS, [0]]]);
     this.adimensional = new SimpleUnit(
       "adimensional",
+      "",
       [],
       DIMENSIONLESS,
       1.0,
@@ -77,11 +78,12 @@ export class QuantitySytem {
 
   public newSimpleUnit<Q extends Quantity>(
     name: string,
+    symbol: string,
     synonyms: string[],
     quantity: Q,
     factor: number,
   ): SimpleUnit<Q> {
-    return new SimpleUnit(name, synonyms, quantity, factor, this._base);
+    return new SimpleUnit(name, symbol, synonyms, quantity, factor, this._base);
   }
 
   public newCompositeUnit<
@@ -89,11 +91,20 @@ export class QuantitySytem {
     QDivisor extends Quantity,
   >(
     name: string,
+    symbol: string,
     synonyms: string[],
     dividend: ISimpleUnit<QDividend>[],
     divisor: ISimpleUnit<QDivisor>[],
     id?: string,
   ): CompositeUnit {
-    return new CompositeUnit(name, synonyms, dividend, divisor, this._base, id);
+    return new CompositeUnit(
+      name,
+      symbol,
+      synonyms,
+      dividend,
+      divisor,
+      this._base,
+      id,
+    );
   }
 }
