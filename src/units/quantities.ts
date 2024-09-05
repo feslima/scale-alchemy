@@ -31,8 +31,7 @@ export class QuantitySytem {
       1.0,
       this._base,
     );
-
-    this._defaultUnits.set(DIMENSIONLESS, this.adimensional);
+    this._defaultUnits = new Map([[DIMENSIONLESS, this.adimensional]]);
   }
 
   private throwIfInitialized() {
@@ -67,6 +66,13 @@ export class QuantitySytem {
     }
   }
 
+  public reset() {
+    this._dimensions = new Set([DIMENSIONLESS]);
+    this._base = new Map([[DIMENSIONLESS, [0]]]);
+    this._defaultUnits = new Map([[DIMENSIONLESS, this.adimensional]]);
+    this._initialized = false;
+  }
+
   public initialize() {
     this.throwIfInitialized();
 
@@ -95,7 +101,6 @@ export class QuantitySytem {
     synonyms: string[],
     dividend: ISimpleUnit<QDividend>[],
     divisor: ISimpleUnit<QDivisor>[],
-    id?: string,
   ): CompositeUnit {
     return new CompositeUnit(
       name,
@@ -104,7 +109,6 @@ export class QuantitySytem {
       dividend,
       divisor,
       this._base,
-      id,
     );
   }
 }

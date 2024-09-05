@@ -6,11 +6,6 @@ export abstract class AbstractUnit implements IBasicUnitInfo {
     return this.dimension?.every((d) => d === 0) || false;
   }
 
-  private _id: string;
-  public get id(): string {
-    return this._id;
-  }
-
   private _name: string;
   public get name(): string {
     return this._name;
@@ -31,10 +26,8 @@ export abstract class AbstractUnit implements IBasicUnitInfo {
     symbol: string,
     synonyms: string[],
     base: SystemBase,
-    id: string,
     dimension: Maybe<Dimension>,
   ) {
-    this._id = id;
     this._name = name;
     this._symbol = symbol;
     this._synonyms = synonyms;

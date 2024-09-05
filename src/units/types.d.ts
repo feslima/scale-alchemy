@@ -4,9 +4,8 @@ type Dimension = number[];
 type SystemBase = Map<Quantity, Dimension>;
 
 interface IBasicUnitInfo {
-  readonly id: string;
-  readonly name: string;
   readonly symbol: string;
+  readonly name: string;
   readonly synonyms: string[];
   readonly dimension: Dimension | undefined;
   readonly isDimensionless: boolean;

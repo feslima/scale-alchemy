@@ -10,6 +10,9 @@
     "type": "git",
     "url": "git+https://github.com/feslima/scale-alchemy.git"
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "prepare": "husky",
     "check": "tsc --noEmit",

@@ -24,7 +24,7 @@ export class SimpleUnit<Q extends Quantity>
     factor: number,
     base: SystemBase,
   ) {
-    super(name, symbol, synonyms, base, name, base.get(quantity));
+    super(name, symbol, synonyms, base, base.get(quantity));
     this._quantity = quantity;
     this._factor = factor;
   }

@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto";
 import { AbstractUnit } from "./common";
 import { convert, extractUnits, getDimensionFromCompositeUnit } from "./utils";
 
@@ -23,14 +22,12 @@ export class CompositeUnit
     dividend: ISimpleUnit<Quantity>[],
     divisor: ISimpleUnit<Quantity>[],
     base: SystemBase,
-    id?: string,
   ) {
     super(
       name,
       symbol,
       synonyms,
       base,
-      id ?? randomUUID(),
       getDimensionFromCompositeUnit({ dividend, divisor }, base),
     );
     this._dividend = dividend;
