@@ -16,7 +16,8 @@
   "scripts": {
     "prepare": "husky",
     "check": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build": "npm run test && tsc"
   },
   "dependencies": {
     "typescript": "^5.5.4"

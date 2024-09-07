@@ -1,5 +1,6 @@
 import { CompositeUnit } from "./composite";
 import { SimpleUnit } from "./simple";
+import type { ISimpleUnit, Quantity, SystemBase } from "./types";
 import { DIMENSIONLESS, Dimensionless } from "./utils";
 
 /**
@@ -8,8 +9,12 @@ import { DIMENSIONLESS, Dimensionless } from "./utils";
 export class QuantitySytem {
   readonly adimensional: ISimpleUnit<Dimensionless>;
 
-  private _initialized: boolean = false;
   private _dimensions: Set<Quantity>;
+
+  private _initialized: boolean = false;
+  public get isInitialized(): boolean {
+    return this._initialized;
+  }
 
   private _defaultUnits: Map<Quantity, ISimpleUnit<Quantity>> = new Map();
   private _base: SystemBase;
@@ -78,7 +83,7 @@ export class QuantitySytem {
 
     this.buildSystemMatrix();
 
-    this._base = Object.freeze(this._base); // this is global to the unit system
+    this._base = this._base; // this is global to the unit system
     this._initialized = true;
   }
 

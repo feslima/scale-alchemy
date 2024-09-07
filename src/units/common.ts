@@ -1,7 +1,16 @@
-export abstract class AbstractUnit implements IBasicUnitInfo {
+import type {
+  Dimension,
+  IBasicUnitInfo,
+  ICompositeUnit,
+  IUnit,
+  Quantity,
+  SystemBase,
+} from "./types";
+
+export abstract class Unit implements IBasicUnitInfo {
   protected readonly _base: SystemBase;
 
-  readonly dimension: Maybe<Dimension>;
+  readonly dimension?: Dimension;
   public get isDimensionless(): boolean {
     return this.dimension?.every((d) => d === 0) || false;
   }
@@ -26,7 +35,7 @@ export abstract class AbstractUnit implements IBasicUnitInfo {
     symbol: string,
     synonyms: string[],
     base: SystemBase,
-    dimension: Maybe<Dimension>,
+    dimension?: Dimension,
   ) {
     this._name = name;
     this._symbol = symbol;
@@ -35,12 +44,12 @@ export abstract class AbstractUnit implements IBasicUnitInfo {
     this.dimension = dimension;
   }
 
-  public abstract convertTo(to: Unit<Quantity[]>): number;
-  public abstract convertFrom(from: Unit<Quantity[]>): number;
+  public abstract convertTo(to: IUnit<Quantity[]>): number;
+  public abstract convertFrom(from: IUnit<Quantity[]>): number;
   public abstract multiply(
-    unit: Unit<Quantity[]>,
+    unit: IUnit<Quantity[]>,
   ): ICompositeUnit<Quantity[], Quantity[]>;
   public abstract divide(
-    unit: Unit<Quantity[]>,
+    unit: IUnit<Quantity[]>,
   ): ICompositeUnit<Quantity[], Quantity[]>;
 }

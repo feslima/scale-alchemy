@@ -1,27 +1,28 @@
-type Quantity = string;
-type Dimensionless = "Dimensionless";
-type Dimension = number[];
-type SystemBase = Map<Quantity, Dimension>;
+export type Quantity = string;
+export type Dimensionless = "Dimensionless";
+export type Dimension = number[];
+export type SystemBase = Map<Quantity, Dimension>;
 
-interface IBasicUnitInfo {
+export interface IBasicUnitInfo {
   readonly symbol: string;
   readonly name: string;
   readonly synonyms: string[];
-  readonly dimension: Dimension | undefined;
+  readonly dimension?: Dimension;
   readonly isDimensionless: boolean;
 
-  convertTo(to: Unit<Quantity[]>): number;
-  convertFrom(from: Unit<Quantity[]>): number;
-  multiply(unit: Unit<Quantity[]>): ICompositeUnit<Quantity[], Quantity[]>;
-  divide(unit: Unit<Quantity[]>): ICompositeUnit<Quantity[], Quantity[]>;
+  convertTo(to: IUnit<Quantity[]>): number;
+  convertFrom(from: IUnit<Quantity[]>): number;
+  multiply(unit: IUnit<Quantity[]>): ICompositeUnit<Quantity[], Quantity[]>;
+  divide(unit: IUnit<Quantity[]>): ICompositeUnit<Quantity[], Quantity[]>;
 }
 
-interface ISimpleUnit<TQuantity extends Quantity> extends IBasicUnitInfo {
+export interface ISimpleUnit<TQuantity extends Quantity>
+  extends IBasicUnitInfo {
   readonly quantity: TQuantity;
   readonly factor: number;
 }
 
-interface ICompositeUnit<
+export interface ICompositeUnit<
   TDividend extends Quantity[],
   TDivisor extends Quantity[],
 > extends IBasicUnitInfo {
@@ -29,7 +30,8 @@ interface ICompositeUnit<
   divisor: ISimpleUnit<OneOf<TDivisor>>[];
 }
 
-type Unit<Q extends Quantity[]> = ISimpleUnit<OneOf<Q>> | ICompositeUnit<Q, Q>;
+export type IUnit<Q extends Quantity[]> =
+  | ISimpleUnit<OneOf<Q>>
+  | ICompositeUnit<Q, Q>;
 
 type OneOf<T extends any[]> = T extends (infer U)[] ? U : never;
-type Maybe<T> = T | undefined;

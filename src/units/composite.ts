@@ -1,8 +1,16 @@
-import { AbstractUnit } from "./common";
+import { Unit } from "./common";
+import type {
+  ICompositeUnit,
+  ISimpleUnit,
+  IUnit,
+  Quantity,
+  SystemBase,
+} from "./types";
+
 import { convert, extractUnits, getDimensionFromCompositeUnit } from "./utils";
 
 export class CompositeUnit
-  extends AbstractUnit
+  extends Unit
   implements ICompositeUnit<Quantity[], Quantity[]>
 {
   private _dividend: ISimpleUnit<Quantity>[];
@@ -34,15 +42,15 @@ export class CompositeUnit
     this._divisor = divisor;
   }
 
-  public convertTo(to: Unit<Quantity[]>): number {
+  public convertTo(to: IUnit<Quantity[]>): number {
     return convert(this, to, this._base);
   }
 
-  public convertFrom(from: Unit<Quantity[]>): number {
+  public convertFrom(from: IUnit<Quantity[]>): number {
     return convert(from, this, this._base);
   }
 
-  multiply(unit: Unit<Quantity[]>): ICompositeUnit<Quantity[], Quantity[]> {
+  multiply(unit: IUnit<Quantity[]>): ICompositeUnit<Quantity[], Quantity[]> {
     const [dividendFirst, divisorFirst] = extractUnits(this, this._base);
     const [dividendSecond, divisorSecond] = extractUnits(unit, this._base);
 
@@ -65,7 +73,7 @@ export class CompositeUnit
     );
   }
 
-  divide(unit: Unit<Quantity[]>): ICompositeUnit<Quantity[], Quantity[]> {
+  divide(unit: IUnit<Quantity[]>): ICompositeUnit<Quantity[], Quantity[]> {
     const [dividendFirst, divisorFirst] = extractUnits(this, this._base);
     const [dividendSecond, divisorSecond] = extractUnits(unit, this._base);
 

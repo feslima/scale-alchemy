@@ -6,7 +6,15 @@ import {
   EvaluatorWithUnits,
   NumberWithUnitValue,
 } from "./interpreter/unit-evaluator";
-import { CompositeUnit, QuantitySytem, SimpleUnit, convert } from "./units";
+import {
+  CompositeUnit,
+  convert,
+  type Quantity,
+  QuantitySytem,
+  SimpleUnit,
+  type SystemBase,
+  Unit,
+} from "./units";
 
 interface EvaluationResult {
   value: NumberWithUnitValue;
@@ -39,11 +47,14 @@ function evaluate(
 
 export {
   CompositeUnit,
+  convert,
+  evaluate,
   EvaluationResult,
   EvaluationWithUnitEnvironmentType,
   NumberWithUnitValue,
   QuantitySytem,
   SimpleUnit,
-  convert,
-  evaluate
+  Unit,
+  type Quantity,
+  type SystemBase
 };

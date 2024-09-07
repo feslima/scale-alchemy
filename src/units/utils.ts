@@ -1,9 +1,18 @@
+import type {
+  Dimension,
+  ICompositeUnit,
+  ISimpleUnit,
+  IUnit,
+  OneOf,
+  Quantity,
+  SystemBase,
+} from "./types";
 export type Dimensionless = "Dimensionless";
 export const DIMENSIONLESS = "Dimensionless" as Dimensionless;
 
 export function convert<S extends Quantity, D extends Quantity>(
-  source: Unit<S[]>,
-  destination: Unit<D[]>,
+  source: IUnit<S[]>,
+  destination: IUnit<D[]>,
   base: SystemBase,
   skipValidation = false,
 ): number {
@@ -13,7 +22,7 @@ export function convert<S extends Quantity, D extends Quantity>(
   return getFactor(source) / getFactor(destination);
 }
 
-function getFactor<T extends Quantity[]>(unit: Unit<T>): number {
+function getFactor<T extends Quantity[]>(unit: IUnit<T>): number {
   if (isSimpleUnit<T>(unit)) {
     return unit.factor;
   }
@@ -40,8 +49,8 @@ function getFactor<T extends Quantity[]>(unit: Unit<T>): number {
  * @returns true if the conversion is allowed, otherwise false.
  */
 export function analyze<S extends Quantity[], D extends Quantity[]>(
-  source: Unit<S>,
-  destination: Unit<D>,
+  source: IUnit<S>,
+  destination: IUnit<D>,
   base: SystemBase,
 ): boolean {
   const sDim = getDimensionFromUnit<S>(source, base);
@@ -58,7 +67,7 @@ export function analyze<S extends Quantity[], D extends Quantity[]>(
 }
 
 export function extractUnits(
-  unit: Unit<Quantity[]>,
+  unit: IUnit<Quantity[]>,
   base: SystemBase,
 ): [ISimpleUnit<Quantity>[], ISimpleUnit<Quantity>[]] {
   const dividend: ISimpleUnit<Quantity>[] = [];
@@ -81,7 +90,7 @@ export function extractUnits(
 }
 
 function isUnitDimensionless(
-  unit: Unit<Quantity[]>,
+  unit: IUnit<Quantity[]>,
   systemBase: SystemBase,
 ): boolean {
   if (isSimpleUnit(unit)) {
@@ -91,7 +100,7 @@ function isUnitDimensionless(
 }
 
 function isSimpleUnit<T extends Quantity[]>(
-  obj: Unit<T>,
+  obj: IUnit<T>,
 ): obj is ISimpleUnit<OneOf<T>> {
   return "factor" in obj;
 }
@@ -135,7 +144,7 @@ export function getDimensionFromCompositeUnit<
 }
 
 function getDimensionFromUnit<Q extends Quantity[]>(
-  unit: Unit<Q>,
+  unit: IUnit<Q>,
   base: SystemBase,
 ): Dimension | undefined {
   const isSimple = isSimpleUnit<Q>(unit);

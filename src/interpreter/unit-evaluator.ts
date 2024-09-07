@@ -1,4 +1,5 @@
 import { QuantitySytem } from "../units";
+import type { IUnit, Quantity } from "../units/types";
 import {
   ExpressionNode,
   IdentifierExpressionNode,
@@ -51,8 +52,8 @@ export class NumberWithUnitValue extends ValueObject {
     TokenType.CARET,
   ]);
 
-  private _unit: Unit<Quantity[]>;
-  public get unit(): Unit<Quantity[]> {
+  private _unit: IUnit<Quantity[]>;
+  public get unit(): IUnit<Quantity[]> {
     return this._unit;
   }
 
@@ -61,14 +62,14 @@ export class NumberWithUnitValue extends ValueObject {
     return this._value;
   }
 
-  constructor(value: number, unit: Unit<Quantity[]>, precision = 7) {
+  constructor(value: number, unit: IUnit<Quantity[]>, precision = 7) {
     super(ObjectWithUnitType.NUMBER);
     this._value = value;
     this._precision = precision;
     this._unit = unit;
   }
 
-  public convertTo(unit: Unit<Quantity[]>): number {
+  public convertTo(unit: IUnit<Quantity[]>): number {
     const factor = this.unit.convertTo(unit);
     return this.value * factor;
   }
