@@ -102,18 +102,18 @@ export class QuantitySytem {
     QDivisor extends Quantity,
   >(
     name: string,
-    symbol: string,
     synonyms: string[],
     dividend: ISimpleUnit<QDividend>[],
     divisor: ISimpleUnit<QDivisor>[],
+    symbol?: string,
   ): CompositeUnit {
     return new CompositeUnit(
       name,
-      symbol,
       synonyms,
       dividend,
       divisor,
       this._base,
+      symbol,
     );
   }
 }

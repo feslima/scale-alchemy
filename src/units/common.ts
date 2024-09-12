@@ -20,7 +20,7 @@ export abstract class Unit implements IBasicUnitInfo {
     return this._name;
   }
 
-  private _symbol: string;
+  protected _symbol: string;
   public get symbol(): string {
     return this._symbol;
   }

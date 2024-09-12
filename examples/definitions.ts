@@ -117,7 +117,6 @@ export const Kilocalorie = UnitSystem.newSimpleUnit(
 /* ------------------------- Composite units -------------------------*/
 export const KilometerPerLiter = UnitSystem.newCompositeUnit(
   "kilometer per liter",
-  "km/L",
   ["kilometers per liter"],
   [Kilometer],
   [Liter],
@@ -125,7 +124,6 @@ export const KilometerPerLiter = UnitSystem.newCompositeUnit(
 
 export const KilogramPerCubicMeter = UnitSystem.newCompositeUnit(
   "kilogram per cubic meter",
-  "kg/m^3",
   ["kg*m^-3"],
   [Kilogram],
   [CubicMeter],
@@ -133,7 +131,6 @@ export const KilogramPerCubicMeter = UnitSystem.newCompositeUnit(
 
 export const KilogramPerStere = UnitSystem.newCompositeUnit(
   "kilogram per stere",
-  "kg/st",
   ["kg*st^-1"],
   [Kilogram],
   [Stere],
@@ -141,7 +138,6 @@ export const KilogramPerStere = UnitSystem.newCompositeUnit(
 
 export const TonPerCubicMeter = UnitSystem.newCompositeUnit(
   "ton per cubic meter",
-  "t/m^3",
   ["ton*m^-3"],
   [Ton],
   [CubicMeter],
@@ -149,7 +145,6 @@ export const TonPerCubicMeter = UnitSystem.newCompositeUnit(
 
 export const TonPerStere = UnitSystem.newCompositeUnit(
   "ton per stere",
-  "t/st",
   ["ton*st^-1"],
   [Ton],
   [Stere],
@@ -157,7 +152,6 @@ export const TonPerStere = UnitSystem.newCompositeUnit(
 
 export const TonPerGigameter = UnitSystem.newCompositeUnit(
   "ton per gigameter",
-  "t/Gm",
   ["ton*Gm^-1"],
   [Ton],
   [Gigameter],
@@ -165,7 +159,6 @@ export const TonPerGigameter = UnitSystem.newCompositeUnit(
 
 export const KilogramPerTerajoule = UnitSystem.newCompositeUnit(
   "kilogram per terajoule",
-  "kg/TJ",
   ["kg*TJ^-1"],
   [Kilogram],
   [Terajoule],
@@ -173,7 +166,6 @@ export const KilogramPerTerajoule = UnitSystem.newCompositeUnit(
 
 export const TerajoulePerGigaGram = UnitSystem.newCompositeUnit(
   "terajoule per gigagram",
-  "TJ * Gg^-1",
   ["TJ * Gg^-1"],
   [Terajoule],
   [Gigagram],
@@ -181,7 +173,6 @@ export const TerajoulePerGigaGram = UnitSystem.newCompositeUnit(
 
 export const MegawatthourPerStere = UnitSystem.newCompositeUnit(
   "MWh per st",
-  "MHh * st^-1",
   ["MHh * st^-1"],
   [MegaWattHour],
   [Stere],
@@ -189,7 +180,6 @@ export const MegawatthourPerStere = UnitSystem.newCompositeUnit(
 
 export const KilocaloriePerKilogram = UnitSystem.newCompositeUnit(
   "kcal per kg",
-  "kcal/kg",
   ["kcal/kg"],
   [Kilocalorie],
   [Kilogram],

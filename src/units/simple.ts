@@ -58,7 +58,6 @@ export class SimpleUnit<Q extends Quantity>
 
     return new CompositeUnit(
       "generated",
-      "generated",
       ["to be done"],
       dividend,
       divisor,
@@ -79,7 +78,6 @@ export class SimpleUnit<Q extends Quantity>
     divisorSecond.forEach((unit) => dividend.push(unit));
 
     return new CompositeUnit(
-      "generated",
       "generated",
       ["to be done"],
       dividend,

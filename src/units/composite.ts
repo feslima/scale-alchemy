@@ -25,21 +25,30 @@ export class CompositeUnit
 
   constructor(
     name: string,
-    symbol: string,
     synonyms: string[],
     dividend: ISimpleUnit<Quantity>[],
     divisor: ISimpleUnit<Quantity>[],
     base: SystemBase,
+    symbol?: string,
   ) {
     super(
       name,
-      symbol,
+      symbol ?? "",
       synonyms,
       base,
       getDimensionFromCompositeUnit({ dividend, divisor }, base),
     );
     this._dividend = dividend;
     this._divisor = divisor;
+
+    if (symbol !== undefined) {
+      this._symbol = symbol;
+    } else {
+      this._symbol = dividend.map((u) => u.symbol).join("*");
+      if (divisor.length) {
+        this._symbol += "/" + divisor.map((u) => u.symbol).join("*");
+      }
+    }
   }
 
   public convertTo(to: IUnit<Quantity[]>): number {
@@ -63,14 +72,7 @@ export class CompositeUnit
     divisorFirst.forEach((unit) => divisor.push(unit));
     divisorSecond.forEach((unit) => divisor.push(unit));
 
-    return new CompositeUnit(
-      "generated",
-      "generated",
-      ["to be done"],
-      dividend,
-      divisor,
-      this._base,
-    );
+    return new CompositeUnit("generated", [], dividend, divisor, this._base);
   }
 
   divide(unit: IUnit<Quantity[]>): ICompositeUnit<Quantity[], Quantity[]> {
@@ -86,13 +88,6 @@ export class CompositeUnit
     divisorFirst.forEach((unit) => divisor.push(unit));
     dividendSecond.forEach((unit) => divisor.push(unit));
 
-    return new CompositeUnit(
-      "generated",
-      "generated",
-      ["to be done"],
-      dividend,
-      divisor,
-      this._base,
-    );
+    return new CompositeUnit("generated", [], dividend, divisor, this._base);
   }
 }

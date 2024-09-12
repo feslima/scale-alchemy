@@ -61,7 +61,6 @@ const Stere = unitSystem.newSimpleUnit(
 
 const MeterPerSecond = unitSystem.newCompositeUnit(
   "meter per second",
-  "m/s",
   ["meters per second"],
   [Meter],
   [Second],
@@ -77,7 +76,6 @@ const Kilometer = unitSystem.newSimpleUnit(
 
 const KilometerPerHour = unitSystem.newCompositeUnit(
   "kilometer per hour",
-  "km/h",
   ["kilometers per hour"],
   [Kilometer],
   [Hour],
@@ -104,7 +102,6 @@ test.each([
   {
     source: unitSystem.newCompositeUnit(
       "composite adimensional",
-      "",
       [],
       [Meter],
       [Meter],
@@ -115,7 +112,7 @@ test.each([
 ])(
   "composite conversion: $source.name to $destination.name -> %i",
   ({ source, destination, expected }) => {
-    const result = source.convertTo(destination, unitSystem.base);
+    const result = source.convertTo(destination);
     if (isNaN(expected)) {
       expect(result).to.be.NaN;
     } else {
@@ -133,16 +130,15 @@ test("tCH4/st", () => {
   system.add("Volume", CubicMeter);
   system.initialize();
 
-  const inputUnit = unitSystem.newCompositeUnit(
+  const inputUnit = system.newCompositeUnit(
     "unit we have",
-    "kg^2*TJ*TJ^-1*st^-1*Gg^-1",
     [""],
     [Kilogram, Kilogram, Terajoule],
     [Terajoule, Stere, Gigagram],
+    "kg^2*TJ*TJ^-1*st^-1*Gg^-1",
   );
-  const desiredUnit = unitSystem.newCompositeUnit(
+  const desiredUnit = system.newCompositeUnit(
     "unit we want",
-    "ton * st^-1",
     [""],
     [Ton],
     [Stere],
@@ -161,16 +157,14 @@ test("MWh/st", () => {
   system.add("Volume", CubicMeter);
   system.initialize();
 
-  const inputUnit = unitSystem.newCompositeUnit(
+  const inputUnit = system.newCompositeUnit(
     "unit we have",
-    "TJ * st^-1",
     [""],
     [Kilogram, Terajoule],
     [Gigagram, Stere],
   );
-  const desiredUnit = unitSystem.newCompositeUnit(
+  const desiredUnit = system.newCompositeUnit(
     "unit we want",
-    "MWh * st^-1",
     [],
     [MegaWattHour],
     [Stere],
