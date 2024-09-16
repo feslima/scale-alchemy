@@ -7,8 +7,10 @@ import {
   NumberWithUnitValue,
 } from "./interpreter/unit-evaluator";
 import {
+  analyze,
   CompositeUnit,
   convert,
+  isSimpleUnit,
   type Quantity,
   QuantitySytem,
   SimpleUnit,
@@ -46,11 +48,13 @@ function evaluate(
 }
 
 export {
+  analyze,
   CompositeUnit,
   convert,
   evaluate,
   EvaluationResult,
   EvaluationWithUnitEnvironmentType,
+  isSimpleUnit,
   NumberWithUnitValue,
   QuantitySytem,
   SimpleUnit,

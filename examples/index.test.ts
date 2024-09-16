@@ -28,10 +28,10 @@ interface EmissionFactorCalculationTestCase {
   expected: NumberWithUnitValue | string;
 }
 
-UnitSystem.add("Length", Meter);
-UnitSystem.add("Mass", Gram);
-UnitSystem.add("Energy", Joule);
-UnitSystem.add("Volume", CubicMeter);
+UnitSystem.addQuantity(Meter);
+UnitSystem.addQuantity(Gram);
+UnitSystem.addQuantity(Joule);
+UnitSystem.addQuantity(CubicMeter);
 UnitSystem.initialize();
 
 const Adimensional = UnitSystem.adimensional;

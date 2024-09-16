@@ -53,11 +53,11 @@ const CubicMeter = unitSystem.newSimpleUnit(
 
 const Second = unitSystem.newSimpleUnit("second", "s", ["seconds"], "Time", 1);
 
-unitSystem.add("Length", Meter);
-unitSystem.add("Mass", Gram);
-unitSystem.add("Time", Second);
-unitSystem.add("Energy", Joule);
-unitSystem.add("Volume", CubicMeter);
+unitSystem.addQuantity(Meter);
+unitSystem.addQuantity(Gram);
+unitSystem.addQuantity(Second);
+unitSystem.addQuantity(Joule);
+unitSystem.addQuantity(CubicMeter);
 unitSystem.initialize();
 
 test.each([

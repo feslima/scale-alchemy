@@ -1,6 +1,7 @@
 import { CompositeUnit } from "..";
 import { Unit } from "./common";
 import type {
+  Dimension,
   ICompositeUnit,
   ISimpleUnit,
   IUnit,
@@ -30,8 +31,15 @@ export class SimpleUnit<Q extends Quantity>
     quantity: Q,
     factor: number,
     base: SystemBase,
+    dimension?: Dimension,
   ) {
-    super(name, symbol, synonyms, base, base.get(quantity));
+    super(
+      name,
+      symbol,
+      synonyms,
+      base,
+      dimension ?? base.get(quantity)?.dimension,
+    );
     this._quantity = quantity;
     this._factor = factor;
   }
@@ -56,13 +64,7 @@ export class SimpleUnit<Q extends Quantity>
     dividendSecond.forEach((unit) => dividend.push(unit));
     divisorSecond.forEach((unit) => divisor.push(unit));
 
-    return new CompositeUnit(
-      "generated",
-      ["to be done"],
-      dividend,
-      divisor,
-      this._base,
-    );
+    return new CompositeUnit("generated", [], dividend, divisor, this._base);
   }
 
   divide(unit: IUnit<Quantity[]>): ICompositeUnit<Quantity[], Quantity[]> {
@@ -77,12 +79,6 @@ export class SimpleUnit<Q extends Quantity>
     dividendSecond.forEach((unit) => divisor.push(unit));
     divisorSecond.forEach((unit) => dividend.push(unit));
 
-    return new CompositeUnit(
-      "generated",
-      ["to be done"],
-      dividend,
-      divisor,
-      this._base,
-    );
+    return new CompositeUnit("generated", [], dividend, divisor, this._base);
   }
 }

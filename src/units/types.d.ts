@@ -1,7 +1,11 @@
 export type Quantity = string;
 export type Dimensionless = "Dimensionless";
 export type Dimension = number[];
-export type SystemBase = Map<Quantity, Dimension>;
+export interface UnitBase {
+  defaultUnit: ISimpleUnit<Quantity>;
+  dimension: Dimension;
+}
+export type SystemBase = Map<Quantity, UnitBase>;
 
 export interface IBasicUnitInfo {
   readonly symbol: string;

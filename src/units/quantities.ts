@@ -9,7 +9,7 @@ import { DIMENSIONLESS, Dimensionless } from "./utils";
 export class QuantitySytem {
   readonly adimensional: ISimpleUnit<Dimensionless>;
 
-  private _dimensions: Set<Quantity>;
+  private _dimensions: Set<Quantity> = new Set();
 
   private _initialized: boolean = false;
   public get isInitialized(): boolean {
@@ -17,7 +17,7 @@ export class QuantitySytem {
   }
 
   private _defaultUnits: Map<Quantity, ISimpleUnit<Quantity>> = new Map();
-  private _base: SystemBase;
+  private _base: SystemBase = new Map();
   public get base(): SystemBase {
     if (!this._initialized) {
       throw "Quantity system was not initialized.";
@@ -26,17 +26,30 @@ export class QuantitySytem {
   }
 
   constructor() {
-    this._dimensions = new Set([DIMENSIONLESS]);
-    this._base = new Map([[DIMENSIONLESS, [0]]]);
-    this.adimensional = new SimpleUnit(
+    this.initializeBaseMap();
+    this.addQuantity(this._base.get(DIMENSIONLESS)?.defaultUnit!);
+    this.adimensional = this._defaultUnits.get(
+      DIMENSIONLESS,
+    ) as ISimpleUnit<Dimensionless>;
+  }
+
+  private initializeBaseMap() {
+    this._base = new Map();
+
+    const dim = [0];
+    const adimensional = new SimpleUnit(
       "adimensional",
       "",
       [],
       DIMENSIONLESS,
       1.0,
       this._base,
+      dim,
     );
-    this._defaultUnits = new Map([[DIMENSIONLESS, this.adimensional]]);
+    this._base.set(DIMENSIONLESS, {
+      defaultUnit: adimensional,
+      dimension: dim,
+    });
   }
 
   private throwIfInitialized() {
@@ -45,10 +58,10 @@ export class QuantitySytem {
     }
   }
 
-  public add(quantity: Quantity, defaultUnit: ISimpleUnit<Quantity>) {
+  public addQuantity(defaultUnit: ISimpleUnit<Quantity>) {
     this.throwIfInitialized();
-    this._dimensions.add(quantity);
-    this._defaultUnits.set(quantity, defaultUnit);
+    this._dimensions.add(defaultUnit.quantity);
+    this._defaultUnits.set(defaultUnit.quantity, defaultUnit);
   }
 
   private buildSystemMatrix() {
@@ -65,16 +78,24 @@ export class QuantitySytem {
           if (dimension !== DIMENSIONLESS) {
             vector[i] = 1;
           }
-          this._base.set(dimension, vector);
+          const defaultUnit = this._defaultUnits.get(dimension);
+          if (defaultUnit === undefined) {
+            throw `default unit for ${dimension} not found`;
+          }
+          this._base.set(dimension, {
+            defaultUnit: defaultUnit,
+            dimension: vector,
+          });
         }
       }
     }
   }
 
   public reset() {
-    this._dimensions = new Set([DIMENSIONLESS]);
-    this._base = new Map([[DIMENSIONLESS, [0]]]);
-    this._defaultUnits = new Map([[DIMENSIONLESS, this.adimensional]]);
+    this._dimensions = new Set();
+    this._defaultUnits = new Map();
+    this.initializeBaseMap();
+    this.addQuantity(this._base.get(DIMENSIONLESS)?.defaultUnit!);
     this._initialized = false;
   }
 
@@ -83,7 +104,6 @@ export class QuantitySytem {
 
     this.buildSystemMatrix();
 
-    this._base = this._base; // this is global to the unit system
     this._initialized = true;
   }
 

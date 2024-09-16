@@ -99,7 +99,7 @@ function isUnitDimensionless(
   return getDimensionFromCompositeUnit(unit, systemBase).every((d) => d === 0);
 }
 
-function isSimpleUnit<T extends Quantity[]>(
+export function isSimpleUnit<T extends Quantity[]>(
   obj: IUnit<T>,
 ): obj is ISimpleUnit<OneOf<T>> {
   return "factor" in obj;
@@ -117,7 +117,7 @@ export function getDimensionFromCompositeUnit<
   let divisorDimension: Dimension = Array(base.size).fill(0);
 
   unit.dividend.forEach((u) => {
-    const dim = base.get(u.quantity);
+    const dim = base.get(u.quantity)?.dimension;
     dim?.forEach((d, index) => {
       if (d !== 0) {
         dividendDimension[index] += d;
@@ -126,7 +126,7 @@ export function getDimensionFromCompositeUnit<
   });
 
   unit.divisor.forEach((u) => {
-    const dim = base.get(u.quantity);
+    const dim = base.get(u.quantity)?.dimension;
     dim?.forEach((d, index) => {
       if (d !== 0) {
         divisorDimension[index] += d;
@@ -153,7 +153,7 @@ function getDimensionFromUnit<Q extends Quantity[]>(
   if (!isSimple) {
     dim = getDimensionFromCompositeUnit(unit, base);
   } else {
-    const tmpDim = base.get(unit.quantity);
+    const tmpDim = base.get(unit.quantity)?.dimension;
     if (tmpDim === undefined) {
       return tmpDim;
     }

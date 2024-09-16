@@ -81,9 +81,9 @@ const KilometerPerHour = unitSystem.newCompositeUnit(
   [Hour],
 );
 
-unitSystem.add("Length", Meter);
-unitSystem.add("Mass", Gram);
-unitSystem.add("Time", Second);
+unitSystem.addQuantity(Meter);
+unitSystem.addQuantity(Gram);
+unitSystem.addQuantity(Second);
 unitSystem.initialize();
 
 test.each([
@@ -123,11 +123,11 @@ test.each([
 
 test("tCH4/st", () => {
   const system = new QuantitySytem();
-  system.add("Length", Meter);
-  system.add("Mass", Gram);
-  system.add("Time", Second);
-  system.add("Energy", Joule);
-  system.add("Volume", CubicMeter);
+  system.addQuantity(Meter);
+  system.addQuantity(Gram);
+  system.addQuantity(Second);
+  system.addQuantity(Joule);
+  system.addQuantity(CubicMeter);
   system.initialize();
 
   const inputUnit = system.newCompositeUnit(
@@ -150,11 +150,11 @@ test("tCH4/st", () => {
 
 test("MWh/st", () => {
   const system = new QuantitySytem();
-  system.add("Length", Meter);
-  system.add("Mass", Gram);
-  system.add("Time", Second);
-  system.add("Energy", Joule);
-  system.add("Volume", CubicMeter);
+  system.addQuantity(Meter);
+  system.addQuantity(Gram);
+  system.addQuantity(Second);
+  system.addQuantity(Joule);
+  system.addQuantity(CubicMeter);
   system.initialize();
 
   const inputUnit = system.newCompositeUnit(
