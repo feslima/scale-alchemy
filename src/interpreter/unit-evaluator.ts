@@ -42,8 +42,68 @@ export class ErrorValue extends ValueObject {
   }
 }
 
-export class NumberWithUnitValue extends ValueObject {
-  private _precision: number;
+/**
+ * Number representation. One must implement this
+ * interface.
+ *
+ * Why this? In case the user wants a specific number representation,
+ * e.g. dealing with monetary values often demands the use of a
+ * decimal number representation where rounding and precision are
+ * required to have a fine grained control.
+ */
+export interface INumber {
+  readonly value: number;
+  add(other: INumber | number): INumber;
+  minus(other: INumber | number): INumber;
+  multiply(other: INumber | number): INumber;
+  divide(other: INumber | number): INumber;
+  power(other: INumber | number): INumber;
+  equals(other: INumber | number): boolean;
+  toString(): string;
+}
+
+export function isNumberValue(obj: INumber | number): obj is INumber {
+  return typeof obj !== "number";
+}
+
+export class NumberValue implements INumber {
+  readonly value: number;
+  static precision: number = 7;
+
+  constructor(value: number) {
+    this.value = value;
+  }
+
+  public add(other: INumber | number): INumber {
+    const o = isNumberValue(other) ? other.value : other;
+    return new NumberValue(this.value + o);
+  }
+  public minus(other: INumber | number): INumber {
+    const o = isNumberValue(other) ? other.value : other;
+    return new NumberValue(this.value - o);
+  }
+  public multiply(other: INumber | number): INumber {
+    const o = isNumberValue(other) ? other.value : other;
+    return new NumberValue(this.value * o);
+  }
+  public divide(other: INumber | number): INumber {
+    const o = isNumberValue(other) ? other.value : other;
+    return new NumberValue(this.value / o);
+  }
+  public power(other: INumber | number): INumber {
+    const o = isNumberValue(other) ? other.value : other;
+    return new NumberValue(Math.pow(this.value, o));
+  }
+  public equals(other: INumber | number): boolean {
+    const o = isNumberValue(other) ? other.value : other;
+    return Math.abs(this.value - o) <= NumberValue.precision;
+  }
+  public toString(): string {
+    return this.value.toString();
+  }
+}
+
+export class NumberWithUnitValue<N extends INumber> extends ValueObject {
   private static _supportedOperators = new Set<string>([
     TokenType.PLUS,
     TokenType.MINUS,
@@ -57,21 +117,20 @@ export class NumberWithUnitValue extends ValueObject {
     return this._unit;
   }
 
-  private _value: number;
-  public get value(): number {
-    return this._value;
+  private _number: N;
+  public get number(): N {
+    return this._number;
   }
 
-  constructor(value: number, unit: IUnit<Quantity[]>, precision = 7) {
+  constructor(value: N, unit: IUnit<Quantity[]>) {
     super(ObjectWithUnitType.NUMBER);
-    this._value = value;
-    this._precision = precision;
+    this._number = value;
     this._unit = unit;
   }
 
-  public convertTo(unit: IUnit<Quantity[]>): number {
+  public convertTo(unit: IUnit<Quantity[]>): INumber {
     const factor = this.unit.convertTo(unit);
-    return this.value * factor;
+    return this.number.multiply(factor);
   }
 
   public equals(other: object): boolean {
@@ -81,7 +140,7 @@ export class NumberWithUnitValue extends ValueObject {
         return false;
       }
 
-      return Math.abs(this.value * factor - other.value) <= this._precision;
+      return this.number.multiply(factor).equals(other.number);
     }
 
     return false;
@@ -89,8 +148,8 @@ export class NumberWithUnitValue extends ValueObject {
 
   public static evaluate(
     operator: string,
-    left: NumberWithUnitValue,
-    right: NumberWithUnitValue,
+    left: NumberWithUnitValue<INumber>,
+    right: NumberWithUnitValue<INumber>,
   ): ValueObject {
     if (!this._supportedOperators.has(operator)) {
       return new ErrorValue(`operator '${operator}' not supported`);
@@ -104,7 +163,7 @@ export class NumberWithUnitValue extends ValueObject {
             `units '${left.unit.name}' and '${right.unit.name}' are incompatible`,
           );
         }
-        const result = left.value * factor + right.value;
+        const result = left.number.multiply(factor).add(right.number);
         return new NumberWithUnitValue(result, right.unit);
       }
       case TokenType.MINUS: {
@@ -114,16 +173,16 @@ export class NumberWithUnitValue extends ValueObject {
             `units '${left.unit.name}' and '${right.unit.name}' are incompatible`,
           );
         }
-        const result = left.value * factor - right.value;
+        const result = left.number.multiply(factor).minus(right.number);
         return new NumberWithUnitValue(result, right.unit);
       }
       case TokenType.ASTERISK: {
-        const result = left.value * right.value;
+        const result = left.number.multiply(right.number);
         const unit = left.unit.multiply(right.unit);
         return new NumberWithUnitValue(result, unit);
       }
       case TokenType.SLASH: {
-        const result = left.value / right.value;
+        const result = left.number.divide(right.number);
         const unit = left.unit.divide(right.unit);
         return new NumberWithUnitValue(result, unit);
       }
@@ -133,7 +192,7 @@ export class NumberWithUnitValue extends ValueObject {
             "exponentiation only allowed if exponent is dimensionless",
           );
         }
-        const result = Math.pow(left.value, right.value);
+        const result = left.number.power(right.number);
         return new NumberWithUnitValue(result, left.unit);
       }
     }
@@ -142,18 +201,21 @@ export class NumberWithUnitValue extends ValueObject {
 
 export type EvaluationWithUnitEnvironmentType = Map<
   string,
-  NumberWithUnitValue
+  NumberWithUnitValue<INumber>
 >;
 
 export class EvaluatorWithUnits {
   private _system: QuantitySytem;
   private _environment: EvaluationWithUnitEnvironmentType;
+  private _numberConstructor: (n: number) => INumber;
   constructor(
     quantitySystem: QuantitySytem,
     environment: EvaluationWithUnitEnvironmentType,
+    numberConstructor = (n: number) => new NumberValue(n),
   ) {
     this._system = quantitySystem;
     this._environment = environment;
+    this._numberConstructor = numberConstructor;
   }
 
   public evaluate(node: ExpressionNode): ValueObject {
@@ -164,8 +226,8 @@ export class EvaluatorWithUnits {
             "node type does not match with number literal node",
           );
         }
-
-        return new NumberWithUnitValue(node.value, this._system.adimensional);
+        const n = this._numberConstructor(node.value);
+        return new NumberWithUnitValue(n, this._system.adimensional);
       }
       case "Identifier": {
         if (!(node instanceof IdentifierExpressionNode)) {
@@ -229,7 +291,10 @@ export class EvaluatorWithUnits {
     switch (operator) {
       case "-":
         return right instanceof NumberWithUnitValue
-          ? new NumberWithUnitValue(-right.value, right.unit)
+          ? new NumberWithUnitValue(
+              this._numberConstructor(-right.number),
+              right.unit,
+            )
           : new ErrorValue(
               "object to the right of operator is not number type",
             );

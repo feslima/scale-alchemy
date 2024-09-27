@@ -136,4 +136,14 @@ export class QuantitySytem {
       symbol,
     );
   }
+
+  public clone(): QuantitySytem {
+    const s = new QuantitySytem();
+    this._base.forEach((entry, key) => {
+      if (key !== DIMENSIONLESS) {
+        s.addQuantity(entry.defaultUnit);
+      }
+    });
+    return s;
+  }
 }

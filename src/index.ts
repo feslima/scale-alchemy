@@ -4,6 +4,9 @@ import {
   ErrorValue,
   EvaluationWithUnitEnvironmentType,
   EvaluatorWithUnits,
+  INumber,
+  isNumberValue,
+  NumberValue,
   NumberWithUnitValue,
 } from "./interpreter/unit-evaluator";
 import {
@@ -18,15 +21,16 @@ import {
   Unit,
 } from "./units";
 
-interface EvaluationResult {
-  value: NumberWithUnitValue;
+interface EvaluationResult<N extends INumber> {
+  value: NumberWithUnitValue<N>;
   error?: string;
 }
-function evaluate(
+function evaluate<N extends INumber>(
   input: string,
   system: QuantitySytem,
   environment: EvaluationWithUnitEnvironmentType,
-): EvaluationResult {
+  numberConstructor: (n: number) => N,
+): EvaluationResult<N> {
   const expressionTree = new Parser(new Lexer(input)).parse();
   const evaluator = new EvaluatorWithUnits(system, environment);
 
@@ -36,13 +40,16 @@ function evaluate(
   }
   if (result instanceof ErrorValue) {
     return {
-      value: new NumberWithUnitValue(NaN, system.adimensional),
+      value: new NumberWithUnitValue(
+        numberConstructor(NaN),
+        system.adimensional,
+      ),
       error: result.message,
     };
   }
 
   return {
-    value: new NumberWithUnitValue(NaN, system.adimensional),
+    value: new NumberWithUnitValue(numberConstructor(NaN), system.adimensional),
     error: "could not evaluate expression",
   };
 }
@@ -54,7 +61,10 @@ export {
   evaluate,
   EvaluationResult,
   EvaluationWithUnitEnvironmentType,
+  INumber,
+  isNumberValue,
   isSimpleUnit,
+  NumberValue,
   NumberWithUnitValue,
   QuantitySytem,
   SimpleUnit,
