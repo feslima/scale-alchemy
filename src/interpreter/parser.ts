@@ -40,8 +40,15 @@ export class Parser {
     return this._errors;
   }
 
-  constructor(lexer: Lexer) {
+  private readonly _identifierValidator: (literal: string) => boolean;
+
+  constructor(
+    lexer: Lexer,
+    identifierValidator = (literal: string) =>
+      /^[a-zA-Z_$][a-zA-Z_$0-9]*$/.test(literal),
+  ) {
     this._lexer = lexer;
+    this._identifierValidator = identifierValidator;
     this.nextToken();
     this.nextToken();
 
@@ -176,6 +183,12 @@ export class Parser {
   }
 
   private parseIdentifier(): ExpressionNode {
+    if (!this._identifierValidator(this._currentToken.literal)) {
+      this._errors.push(
+        `${this._currentToken.literal} is not a valid variable name`,
+      );
+      return new InvalidExpressionNode(this._currentToken.literal);
+    }
     return new IdentifierExpressionNode(
       this._currentToken,
       this._currentToken.literal,

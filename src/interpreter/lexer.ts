@@ -30,6 +30,20 @@ const MISSING_PARENTHESIS_TOKEN: Token = {
   literal: "parenthesis missing matching pair",
 };
 
+const isLetter = (char: string): boolean => {
+  return (
+    ("a" <= char && char <= "z") || ("A" <= char && char <= "Z") || char === "_"
+  );
+};
+
+const isDigit = (char: string): boolean => {
+  return "0" <= char && char <= "9";
+};
+
+const isValidForIdentifier = (char: string): boolean => {
+  return isLetter(char) || isDigit(char);
+};
+
 export class Lexer {
   private _input: string;
   private _position: number;
@@ -37,6 +51,10 @@ export class Lexer {
   private _currentChar: string;
 
   private _parenthesisTracker: number[] = [];
+
+  private _isIdentifierMatch: (char: string) => boolean;
+  private _isValidForIdentifierMatch: (char: string) => boolean;
+  private _isDigitMatch: (char: string) => boolean;
 
   /* NOTE: next char for number has to be one of tokens
    * defined here.
@@ -52,11 +70,26 @@ export class Lexer {
     TokenType.DOT,
   ]);
 
-  constructor(input: string) {
+  /**
+   * @param input - raw string;
+   * @param isIdentifierMatcher - function that is called to check if the
+   * first char of identifier token is valid.
+   * @param isValidForIdentifierMatcher - function that is called to check
+   * if the subsequent chars after a identifer match are valid
+   */
+  constructor(
+    input: string,
+    isIdentifierMatcher = isLetter,
+    isValidForIdentifierMatcher = isValidForIdentifier,
+    isDigitMatcher = isDigit,
+  ) {
     this._input = input;
     this._position = 0;
     this._readPosition = 0;
     this._currentChar = "";
+    this._isIdentifierMatch = isIdentifierMatcher;
+    this._isValidForIdentifierMatch = isValidForIdentifierMatcher;
+    this._isDigitMatch = isDigitMatcher;
 
     this.readChar();
   }
@@ -114,13 +147,13 @@ export class Lexer {
         }
         break;
       default:
-        if (this.isLetter(this._currentChar)) {
+        if (this._isIdentifierMatch(this._currentChar)) {
           result = {
             type: TokenType.IDENTIFIER,
             literal: this.readIdentifier(),
           };
           return result;
-        } else if (this.isDigit(this._currentChar)) {
+        } else if (this._isDigitMatch(this._currentChar)) {
           try {
             result = {
               type: TokenType.NUMBER,
@@ -162,10 +195,7 @@ export class Lexer {
 
   private readIdentifier(): string {
     const position = this._position;
-    while (
-      this.isLetter(this._currentChar) ||
-      this.isDigit(this._currentChar)
-    ) {
+    while (this._isValidForIdentifierMatch(this._currentChar)) {
       this.readChar();
     }
     return this._input.slice(position, this._position);
@@ -178,7 +208,7 @@ export class Lexer {
   private readNumber(): string {
     const position = this._position;
     while (
-      this.isDigit(this._currentChar) ||
+      this._isDigitMatch(this._currentChar) ||
       this.isDecimalSeparator(this._currentChar) ||
       this.isExponent(this._currentChar)
     ) {
@@ -190,7 +220,7 @@ export class Lexer {
       }
 
       const nextChar = this.peekChar();
-      if (this.isDigit(nextChar) || this.isWhiteSpace(nextChar)) {
+      if (this._isDigitMatch(nextChar) || this.isWhiteSpace(nextChar)) {
         continue;
       }
       if (!this.isNextCharValidForNumber(nextChar)) {
@@ -207,7 +237,7 @@ export class Lexer {
       this.readChar(); // means that the exponent begins with either + or -
     }
 
-    while (this.isDigit(this._currentChar)) {
+    while (this._isDigitMatch(this._currentChar)) {
       this.readChar();
     }
   }
@@ -226,18 +256,6 @@ export class Lexer {
 
   private isValidExponentPrefix(char: string): boolean {
     return char === TokenType.PLUS || char === TokenType.MINUS;
-  }
-
-  private isLetter(char: string): boolean {
-    return (
-      ("a" <= char && char <= "z") ||
-      ("A" <= char && char <= "Z") ||
-      char === "_"
-    );
-  }
-
-  private isDigit(char: string): boolean {
-    return "0" <= char && char <= "9";
   }
 
   private isWhiteSpace(char: string): boolean {

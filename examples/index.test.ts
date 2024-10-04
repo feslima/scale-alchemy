@@ -153,6 +153,7 @@ test.each([
     if (typeof expected === "string") {
       expect(result).to.have.property("error").be.equal(expected);
     } else {
+      expect(result.error).to.be.undefined;
       const actual = result.value.convertTo(expected.unit).value;
       expect(actual).to.be.closeTo(expected.number.value, 1e-6);
     }
