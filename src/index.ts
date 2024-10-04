@@ -25,13 +25,32 @@ interface EvaluationResult<N extends INumber> {
   value: NumberWithUnitValue<N>;
   error?: string;
 }
+
+type LexerParameters = ConstructorParameters<typeof Lexer>;
+type ParserParameters = ConstructorParameters<typeof Parser>;
+interface EvaluationOptions {
+  isValidVariableMatcher: LexerParameters[1];
+  variableValidator: ParserParameters[1];
+}
+
 function evaluate<N extends INumber>(
   input: string,
   system: QuantitySytem,
   environment: EvaluationWithUnitEnvironmentType,
   numberConstructor: (n: number) => N,
+  opts?: EvaluationOptions,
 ): EvaluationResult<N> {
-  const expressionTree = new Parser(new Lexer(input)).parse();
+  let lexer: Lexer;
+  let parser: Parser;
+  if (opts) {
+    lexer = new Lexer(input, opts.isValidVariableMatcher);
+    parser = new Parser(lexer, opts.variableValidator);
+  } else {
+    lexer = new Lexer(input);
+    parser = new Parser(lexer);
+  }
+
+  const expressionTree = parser.parse();
   const evaluator = new EvaluatorWithUnits(system, environment);
 
   const result = evaluator.evaluate(expressionTree);
