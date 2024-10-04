@@ -45,7 +45,7 @@ export class Parser {
   constructor(
     lexer: Lexer,
     identifierValidator = (literal: string) =>
-      /^[a-zA-Z_$][a-zA-Z_$0-9]*$/.test(literal),
+      /^[a-zA-Z_][a-zA-Z_0-9]*$/.test(literal),
   ) {
     this._lexer = lexer;
     this._identifierValidator = identifierValidator;
