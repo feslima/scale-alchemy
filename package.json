@@ -1,6 +1,6 @@
 {
   "name": "scale-alchemy",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "Convenient evaluation of mathematical expressions involving measurement units.",
   "homepage": "https://github.com/feslima/scale-alchemy",
   "author": {
