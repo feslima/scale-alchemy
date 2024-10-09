@@ -14,12 +14,6 @@ export enum TokenType {
   NOTHING = "",
 }
 
-class LexerError extends Error {
-  constructor(message: string) {
-    super(message);
-  }
-}
-
 export interface Token {
   type: TokenType;
   literal: string;
@@ -140,17 +134,10 @@ export class Lexer {
           };
           return result;
         } else if (this._isDigitMatch(this._currentChar)) {
-          try {
-            result = {
-              type: TokenType.NUMBER,
-              literal: this.readNumber(),
-            };
-          } catch (error: unknown) {
-            result = {
-              type: TokenType.ILLEGAL,
-              literal: error instanceof LexerError ? error.message : "",
-            };
-          }
+          result = {
+            type: TokenType.NUMBER,
+            literal: this.readNumber(),
+          };
           return result;
         } else {
           result = { type: TokenType.ILLEGAL, literal: this._currentChar };
@@ -169,14 +156,6 @@ export class Lexer {
 
     this._position = this._readPosition;
     this._readPosition++;
-  }
-
-  private peekChar(): string {
-    if (this._readPosition >= this._input.length) {
-      return "";
-    }
-
-    return this._input[this._readPosition];
   }
 
   private readIdentifier(): string {
