@@ -56,20 +56,6 @@ export class Lexer {
   private _isValidForIdentifierMatch: (char: string) => boolean;
   private _isDigitMatch: (char: string) => boolean;
 
-  /* NOTE: next char for number has to be one of tokens
-   * defined here.
-   * */
-  private _validCharSetForNumber = new Set<string>([
-    TokenType.PLUS,
-    TokenType.MINUS,
-    TokenType.ASTERISK,
-    TokenType.SLASH,
-    TokenType.CARET,
-    TokenType.RIGHT_PARENTHESIS,
-    TokenType.NOTHING,
-    TokenType.DOT,
-  ]);
-
   /**
    * @param input - raw string;
    * @param isIdentifierMatcher - function that is called to check if the
@@ -207,26 +193,16 @@ export class Lexer {
    */
   private readNumber(): string {
     const position = this._position;
-    while (
-      this._isDigitMatch(this._currentChar) ||
-      this.isDecimalSeparator(this._currentChar) ||
-      this.isExponent(this._currentChar)
-    ) {
+    while (this._isDigitMatch(this._currentChar)) {
       this.readChar();
 
       if (this.isExponent(this._currentChar)) {
         this.readChar(); // skip the exponent symbol
         this.readNumberExponent();
-      }
-
-      const nextChar = this.peekChar();
-      if (this._isDigitMatch(nextChar) || this.isWhiteSpace(nextChar)) {
         continue;
-      }
-      if (!this.isNextCharValidForNumber(nextChar)) {
-        throw new LexerError(
-          `invalid number '${this._input.slice(position, this._readPosition)}'`,
-        );
+      } else if (this.isDecimalSeparator(this._currentChar)) {
+        this.readChar();
+        continue;
       }
     }
     return this._input.slice(position, this._position);
@@ -240,10 +216,6 @@ export class Lexer {
     while (this._isDigitMatch(this._currentChar)) {
       this.readChar();
     }
-  }
-
-  private isNextCharValidForNumber(char: string): boolean {
-    return this._validCharSetForNumber.has(char);
   }
 
   private isDecimalSeparator(char: string): boolean {

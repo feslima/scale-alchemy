@@ -24,6 +24,9 @@ const precedences = new Map<TokenType, Precedence>([
   [TokenType.CARET, Precedence.EXPONENT],
 ]);
 
+const defaultIdentifierValidator = (literal: string) =>
+  /^[a-zA-Z][a-zA-Z_0-9]*$/.test(literal);
+
 export class Parser {
   private _lexer: Lexer;
   private _currentToken: Token = { type: TokenType.ILLEGAL, literal: "" };
@@ -42,11 +45,7 @@ export class Parser {
 
   private readonly _identifierValidator: (literal: string) => boolean;
 
-  constructor(
-    lexer: Lexer,
-    identifierValidator = (literal: string) =>
-      /^[a-zA-Z_][a-zA-Z_0-9]*$/.test(literal),
-  ) {
+  constructor(lexer: Lexer, identifierValidator = defaultIdentifierValidator) {
     this._lexer = lexer;
     this._identifierValidator = identifierValidator;
     this.nextToken();

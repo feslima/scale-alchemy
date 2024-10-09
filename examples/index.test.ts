@@ -145,6 +145,24 @@ test.each([
     ]),
     expected: new NumberWithUnitValue(nv(0.0627184764), TonPerGigameter),
   },
+  {
+    input:
+      "DensityDiesel*EF_Diesel*(1-FracBio) + DensityBiodiesel*EF_Biodiesel*FracBio",
+    environment: new Map([
+      [
+        "DensityDiesel",
+        new NumberWithUnitValue(nv(840), KilogramPerCubicMeter),
+      ],
+      [
+        "DensityBiodiesel",
+        new NumberWithUnitValue(nv(880), KilogramPerCubicMeter),
+      ],
+      ["FracBio", new NumberWithUnitValue(nv(0.12), Adimensional)],
+      ["EF_Diesel", new NumberWithUnitValue(nv(0.65389), Adimensional)],
+      ["EF_Biodiesel", new NumberWithUnitValue(nv(3.00778), Adimensional)],
+    ]),
+    expected: new NumberWithUnitValue(nv(0.800977056), TonPerCubicMeter),
+  },
 ] as EmissionFactorCalculationTestCase[])(
   "realistic evaluation with units of: $input",
   ({ input, environment, expected }) => {
