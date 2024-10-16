@@ -99,7 +99,7 @@ const Adimensional = UnitSystem.adimensional; // default in every instance of un
 const nv = (n: number) => new NumberValue(n);
 
 // define your mathemathical expression
-const input = "((1 - FracBio) * EFCO2Diesel)/FuelEfficiency"
+const input = "((1 - FracBio) * EFCO2Diesel) / FuelEfficiency"
 
 // define your inputs
 const environment = new Map([
