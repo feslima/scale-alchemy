@@ -51,7 +51,11 @@ function evaluate<N extends INumber>(
   }
 
   const expressionTree = parser.parse();
-  const evaluator = new EvaluatorWithUnits(system, environment);
+  const evaluator = new EvaluatorWithUnits(
+    system,
+    environment,
+    numberConstructor,
+  );
 
   const result = evaluator.evaluate(expressionTree);
   if (result instanceof NumberWithUnitValue) {
