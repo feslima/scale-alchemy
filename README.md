@@ -1,6 +1,6 @@
 ## Scale alchemy
 General purpose typescript library for evaluation (and dimensional analysis) of
-mathemathical expressions.
+mathematical expressions.
 
 ### What is the problem this library solves?
 Suppose you have an equation `((1 - FracBio) * EFCO2Diesel)/FuelEfficiency` that
@@ -98,7 +98,7 @@ const KilogramPerLiter = UnitSystem.newCompositeUnit(
 const Adimensional = UnitSystem.adimensional; // default in every instance of unit system
 const nv = (n: number) => new NumberValue(n);
 
-// define your mathemathical expression
+// define your mathematical expression
 const input = "((1 - FracBio) * EFCO2Diesel) / FuelEfficiency"
 
 // define your inputs
@@ -119,13 +119,13 @@ console.log(result.value.convertTo(KilogramPerLiter).number.value)
 ```
 
 ### Whats the rationale behind the evaluation process?
-There are 2 main pieces involved when calculating these physical/mathemathical expressions:
+There are 2 main pieces involved when calculating these physical/mathematical expressions:
 1. A simplified tree-walking interpreter with Pratt-parsing is responsible for
     crunching the numbers in the expression.
 2. Mixed with the interpreter evaluation it is implemented a general approach for dimensional
     analysis and conversions of units of measurement that is described [here](https://www.cs.utexas.edu/~ai-lab/?novak:ieeetse95).
 
-### Which mathemathical operators are supported?
+### Which mathematical operators are supported?
 For now, these are the operators implemented:
 - addition `+`;
 - subtraction `-`;
