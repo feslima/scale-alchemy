@@ -41,7 +41,9 @@ jobs:
         run: npm install
       - name: Release if running on main
         if: ${{ success() && github.ref == 'refs/heads/main' }}
-        run: npx semantic-release
+        run: |
+          npm run build
+          npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
